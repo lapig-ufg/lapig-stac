@@ -27,6 +27,12 @@ catalog/catalog.json
 catalog/collections.json
 catalog/lapig-catalog.json
 
+# Exceções: arquivos pequenos do catálogo necessários ao build Docker
+!catalog/pasture-area.json
+!catalog/pasture-vigor.json
+!catalog/items_rustac.parquet
+!catalog/styles/
+
 # === Ambiente ===
 .env
 .env.local
