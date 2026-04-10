@@ -12,7 +12,7 @@ Catálogo de dados geoespaciais do **LAPIG/UFG** compatível com [STAC v1.1.0](h
 Disponibiliza coleções de pastagem (área e vigor) do MapBiomas como itens STAC com COGs otimizados, servidos dinamicamente via [rustac](https://github.com/stac-utils/rustac).
 
 <p align="center">
-  <video src="docs/assets/lapig-stac-demo.mp4" width="720" autoplay loop muted>
+  <video src="docs/assets/lapig-stac-demo.mp4" width="920" autoplay loop muted>
     Seu navegador não suporta o elemento de vídeo.
   </video>
 </p>
