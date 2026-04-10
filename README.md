@@ -1,30 +1,40 @@
-# LAPIG STAC
+<p align="center">
+  <img src="browser-v2/src/assets/layout/logos/lapig-stac.png" alt="LAPIG STAC" width="340" />
+</p>
 
-[![STAC v1.1.0](https://img.shields.io/badge/STAC-v1.1.0-blue)](https://stacspec.org/)
-[![License: CC-BY-SA-4.0](https://img.shields.io/badge/License-CC--BY--SA--4.0-lightgrey)](https://creativecommons.org/licenses/by-sa/4.0/)
+<p align="center">
+  <a href="https://stacspec.org/"><img src="https://img.shields.io/badge/STAC-v1.1.0-blue" alt="STAC v1.1.0" /></a>
+  <a href="https://creativecommons.org/licenses/by-sa/4.0/"><img src="https://img.shields.io/badge/License-CC--BY--SA--4.0-lightgrey" alt="License" /></a>
+</p>
 
 Catálogo de dados geoespaciais do **LAPIG/UFG** compatível com [STAC v1.1.0](https://stacspec.org/).
 
 Disponibiliza coleções de pastagem (área e vigor) do MapBiomas como itens STAC com COGs otimizados, servidos dinamicamente via [rustac](https://github.com/stac-utils/rustac).
 
+<p align="center">
+  <video src="docs/assets/lapig-stac-demo.mp4" width="720" autoplay loop muted>
+    Seu navegador não suporta o elemento de vídeo.
+  </video>
+</p>
+
 ## Arquitetura
 
-```
-                porta 80
-           ┌──── Nginx ────┐
-           │                │
-      /api/*            /*
-           │                │
-     rustac serve     Angular Browser
-     :7822            :80 (PrimeNG + OL)
-           │                │
-  items.parquet        WebGL COG
-  + collections JSON   rendering
-```
+### Infraestrutura (runtime)
 
-- **API**: [rustac](https://github.com/stac-utils/rustac) v0.9.8 — servidor STAC dinâmico a partir de GeoParquet
-- **Browser**: Angular 21 + PrimeNG 21 + OpenLayers 10.7 — visualização interativa com renderização WebGL de COGs
-- **Proxy**: Nginx — roteamento, CORS para COGs no S3, estilos SLD/QML
+![Infraestrutura runtime](docs/assets/infraestrutura-runtime.png)
+
+### Pipeline de dados (offline)
+
+![Pipeline de dados](docs/assets/pipeline-dados.png)
+
+### Componentes
+
+| Componente | Tecnologia | Funcao |
+|---|---|---|
+| **API STAC** | [rustac](https://github.com/stac-utils/rustac) v0.9.8 + DuckDB | Servidor STAC dinamico a partir de GeoParquet |
+| **Browser** | Angular 21 + PrimeNG 21 + OpenLayers 10.7 | Visualizacao interativa com renderizacao WebGL de COGs |
+| **Proxy** | Nginx 1.29 | Roteamento, CORS para COGs no S3, estilos estaticos (SLD/QML) |
+| **Pipeline** | Python 3.11 + GDAL + Click | Geracao de catalogo STAC, conversao COG, enriquecimento de metadados |
 
 ## Início rápido
 
@@ -112,6 +122,9 @@ lapig-stac/
 │   ├── styles/               #   SLD/QML servidos pelo Nginx
 │   ├── pasture-area.json     #   Coleção limpa para rustac
 │   └── pasture-vigor.json    #   Coleção limpa para rustac
+├── video/                     # Vídeo institucional (Remotion)
+│   ├── src/                   #   Composições e cenas
+│   └── public/                #   Screenshots do browser
 ├── docs/                      # Documentação técnica
 ├── infra/nginx/               # Configuração do proxy reverso
 ├── Dockerfile                 # Build da API STAC (rustac via pip)
@@ -119,11 +132,49 @@ lapig-stac/
 └── Justfile                   # Task runner para pipeline e Docker
 ```
 
+## Vídeo de apresentação
+
+O projeto inclui um vídeo institucional criado com [Remotion](https://remotion.dev/) que demonstra as principais funcionalidades do Browser STAC.
+
+### Pré-visualizar no Remotion Studio
+
+```bash
+cd video
+npm install
+npm start
+```
+
+### Renderizar o vídeo (MP4)
+
+```bash
+cd video
+npm run build
+# Saída: video/out/lapig-stac.mp4
+```
+
+O vídeo apresenta:
+- **Explorar Dados** — catálogo de coleções STAC
+- **Coleções Detalhadas** — itens anuais com thumbnails e mapa
+- **Busca Espacial** — filtros geográficos e temporais
+- **Detalhe do Item** — metadados, renderização WebGL e assets
+
 ## Documentação
 
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Conformidade STAC](docs/STAC-COMPLIANCE.md)
 - [Deployment](docs/DEPLOYMENT.md)
+
+## Parceiros
+
+<p align="center">
+  <a href="https://www.lapig.iesa.ufg.br"><img src="browser-v2/src/assets/images/logo-lapig.png" alt="LAPIG" height="50" /></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://ufg.br"><img src="browser-v2/src/assets/images/logo-ufg.png" alt="UFG" height="50" /></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://mapbiomas.org"><img src="browser-v2/src/assets/images/logo-mapbiomas.png" alt="MapBiomas" height="50" /></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://opengeohub.org"><img src="browser-v2/src/assets/images/logo-opengeohub.png" alt="OpenGeoHub" height="50" /></a>
+</p>
 
 ## Licença
 
