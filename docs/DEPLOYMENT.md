@@ -49,71 +49,87 @@ curl -s http://localhost/api/ | jq .
 curl -s http://localhost/api/collections | jq '.collections[].id'
 ```
 
-## Deploy em Producao
+## Deploy em Produção
 
-### Variaveis de Ambiente
+### Infraestrutura
 
-| Variavel | Padrao | Descricao |
+A aplicação está publicada em **https://stac.lapig.iesa.ufg.br** com a seguinte infraestrutura:
+
+| Componente | Tecnologia |
+|---|---|
+| Orquestração | Docker Swarm (vm1 + vm2) |
+| Reverse proxy | Traefik v3.6.7 com TLS automático (Let's Encrypt) |
+| DNS | BIND9 (zona `lapig.iesa.ufg.br`) |
+| CI/CD | GitHub Actions → DockerHub → zelador (deploy automático) |
+| Imagem | `lapig/lapig-stac:prod_latest` (Python 3.12 + nginx + rustac + Angular SPA) |
+
+### Pipeline CI/CD
+
+Cada push na branch `main` executa automaticamente:
+
+1. **Build** (GitHub Actions, `ubuntu-latest`): constrói imagem Docker unificada via `docker/prod/Dockerfile` e publica no DockerHub.
+2. **Deploy** (runner self-hosted `vm1`): `zelador` atualiza o serviço no Docker Swarm.
+
+```
+push main → GitHub Actions → DockerHub → zelador → Docker Swarm → Traefik (TLS)
+```
+
+### Arquivos de configuração (servidor)
+
+| Arquivo | Caminho no servidor |
+|---|---|
+| Compose do serviço | `/glusterfs/aplications/services/lapig-stac/prod.compose.yml` |
+| Zona DNS | `/glusterfs/aplications/lapig.zone` |
+| Configuração Traefik | `/glusterfs/aplications/tools/002_treaefik/traefik.yml` |
+
+### Variáveis de ambiente (produção)
+
+| Variável | Descrição |
+|---|---|
+| `MAPBOX_TOKEN` | Token do Mapbox para basemap do browser (injetado em runtime) |
+
+### Verificação
+
+```bash
+# Landing page da API
+curl -s https://stac.lapig.iesa.ufg.br/api/ | jq .
+
+# Listar coleções
+curl -s https://stac.lapig.iesa.ufg.br/api/collections | jq '.collections[].id'
+
+# Health check
+curl -f https://stac.lapig.iesa.ufg.br/api/
+```
+
+### Variáveis de ambiente (desenvolvimento local)
+
+| Variável | Padrão | Descrição |
 |---|---|---|
-| `STAC_HOST` | `0.0.0.0` | Endereco de bind da API |
+| `STAC_HOST` | `0.0.0.0` | Endereço de bind da API |
 | `STAC_PORT` | `8000` | Porta da API |
 | `CATALOG_PARQUET_PATH` | `/app/catalog/items.parquet` | Caminho do arquivo Parquet |
-| `COLLECTIONS_JSON_PATH` | `/app/catalog/collections.json` | Caminho do JSON de colecoes |
-| `CATALOG_TITLE` | `LAPIG Data Catalog` | Titulo do catalogo |
-| `PUBLIC_URL` | `http://localhost` | URL publica da API |
-| `RUST_LOG` | `info` | Nivel de log (trace, debug, info, warn, error) |
-
-### Com Docker Compose
-
-1. Ajustar variaveis no `docker-compose.yml` ou criar um arquivo `.env`.
-2. Alterar `PUBLIC_URL` para o dominio de producao.
-3. Configurar TLS no nginx ou em um load balancer externo.
-
-```bash
-docker compose -f docker-compose.yml up -d --build
-```
-
-### Sem Docker (binario nativo)
-
-```bash
-# Compilar
-cargo build --release --package lapig-stac-api
-
-# Executar
-STAC_HOST=0.0.0.0 \
-STAC_PORT=8000 \
-CATALOG_PARQUET_PATH=./catalog/items.parquet \
-COLLECTIONS_JSON_PATH=./catalog/collections.json \
-PUBLIC_URL=https://stac.lapig.iesa.ufg.br \
-RUST_LOG=info \
-./target/release/lapig-stac-api
-```
-
-### TLS/HTTPS
-
-Em producao, recomenda-se utilizar um dos seguintes mecanismos para TLS:
-
-- **Traefik** ou **Caddy** como reverse proxy com certificado automatico (Let's Encrypt).
-- **Nginx** com `certbot` para gerenciamento de certificados.
-- **Load balancer externo** (AWS ALB, GCP LB) terminando TLS antes do container.
+| `COLLECTIONS_JSON_PATH` | `/app/catalog/collections.json` | Caminho do JSON de coleções |
+| `CATALOG_TITLE` | `LAPIG Data Catalog` | Título do catálogo |
+| `PUBLIC_URL` | `http://localhost` | URL pública da API |
+| `RUST_LOG` | `info` | Nível de log (trace, debug, info, warn, error) |
 
 ### Health Check
 
-A API expoe a rota raiz (`/`) como health check. O `docker-compose.yml` ja inclui configuracao de healthcheck para o servico `stac-api`.
+A API expõe a rota raiz (`/`) como health check. Em produção, o Docker Swarm verifica `curl -f http://localhost/api/` periodicamente.
 
 ```bash
-curl -f http://localhost:8000/
+# Desenvolvimento local
+curl -f http://localhost:3000/api/
+
+# Produção
+curl -f https://stac.lapig.iesa.ufg.br/api/
 ```
 
-## Atualizacao do Catalogo
+## Atualização do catálogo
 
-Para atualizar os dados sem reconstruir as imagens Docker:
+Em produção, os dados do catálogo estão embutidos na imagem Docker. Para atualizar:
 
-1. Executar o pipeline Python para regenerar `items.parquet` e `collections.json`.
-2. Reiniciar apenas o servico da API:
+1. Executar o pipeline Python para regenerar os artefatos no diretório `catalog/`.
+2. Fazer commit e push para `main` — o CI/CD reconstrói a imagem automaticamente.
 
-```bash
-docker compose restart stac-api
-```
-
-Os arquivos do catalogo sao montados via volume (`./catalog:/app/catalog:ro`), portanto nao e necessario rebuild da imagem.
+Em desenvolvimento local, os arquivos são montados via volume (`./catalog:/app/catalog:ro`), permitindo atualização sem rebuild.

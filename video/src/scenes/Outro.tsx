@@ -35,9 +35,9 @@ export const Outro: React.FC = () => {
 
   // Links
   const linkItems = [
+    "stac.lapig.iesa.ufg.br",
     "github.com/lapig-ufg/lapig-stac",
     "stacspec.org",
-    "mapbiomas.org",
   ];
 
   const linkProgresses = linkItems.map((_, i) =>

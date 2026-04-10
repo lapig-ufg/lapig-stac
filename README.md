@@ -79,7 +79,7 @@ rustac serve \
     --addr 0.0.0.0:7822
 ```
 
-### 4. Docker Compose (produção)
+### 4. Docker Compose (desenvolvimento local)
 
 ```bash
 docker compose up -d --build
@@ -91,6 +91,19 @@ docker compose up -d --build
 | `http://localhost:3000/api` | API STAC (JSON) |
 | `http://localhost:3000/api/collections` | Coleções |
 | `http://localhost:3000/api/search` | Busca (POST) |
+
+### Produção
+
+A aplicação está disponível em produção no endereço:
+
+| URL | Descrição |
+|---|---|
+| [`https://stac.lapig.iesa.ufg.br`](https://stac.lapig.iesa.ufg.br) | Browser STAC |
+| [`https://stac.lapig.iesa.ufg.br/api`](https://stac.lapig.iesa.ufg.br/api) | API STAC (JSON) |
+| [`https://stac.lapig.iesa.ufg.br/api/collections`](https://stac.lapig.iesa.ufg.br/api/collections) | Coleções |
+| [`https://stac.lapig.iesa.ufg.br/api/search`](https://stac.lapig.iesa.ufg.br/api/search) | Busca (POST) |
+
+O deploy é automatizado via GitHub Actions: cada push na branch `main` constrói a imagem Docker, publica no DockerHub e atualiza o serviço no Docker Swarm com TLS via Let's Encrypt.
 
 ## Coleções
 
@@ -122,8 +135,9 @@ lapig-stac/
 │   └── pasture-vigor.json    #   Coleção limpa para rustac
 ├── docs/                      # Documentação técnica
 ├── infra/nginx/               # Configuração do proxy reverso
+├── docker/prod/               # Dockerfile e configs de produção (CI/CD)
 ├── Dockerfile                 # Build da API STAC (rustac via pip)
-├── docker-compose.yml         # Orquestração dos 3 serviços
+├── docker-compose.yml         # Orquestração dos 3 serviços (desenvolvimento)
 └── Justfile                   # Task runner para pipeline e Docker
 ```
 

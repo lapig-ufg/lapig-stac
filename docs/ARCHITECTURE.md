@@ -55,8 +55,9 @@ O LAPIG STAC é um catálogo de dados geoespaciais compatível com a especifica�
 | COGs remotos (S3 LAPIG) | Ativos raster servidos via S3 com suporte a HTTP Range requests; proxy CORS via Nginx |
 | WebGL COG rendering | Renderização direta de COGs no browser via OpenLayers WebGLTileLayer — sem necessidade de tile server intermediário |
 | Estilos por classificação | Cores derivadas de `classification:classes` (STAC summaries) e SLD (OGC) — estilo data-driven, sem hardcode |
-| Multi-stage Docker build | Imagem final leve (python-slim + rustac wheel) |
+| Multi-stage Docker build | Imagem unificada de produção (Python 3.12 + nginx + rustac + Angular SPA) |
 | Nginx como proxy reverso | URL unificada, simplifica CORS, serve estilos estáticos (SLD/QML) |
+| CI/CD automatizado | GitHub Actions → DockerHub → zelador → Docker Swarm (https://stac.lapig.iesa.ufg.br) |
 
 ## Estrutura de diretórios
 
@@ -77,7 +78,13 @@ lapig-stac/
 │   └── *.json                 #   Coleções limpas para rustac
 ├── docs/                       # Documentação técnica
 ├── infra/nginx/                # Configuração do proxy reverso
-├── Dockerfile                  # Build da API STAC (rustac via pip)
-├── docker-compose.yml          # Orquestração dos 3 serviços
+├── docker/prod/                # Dockerfile e configs de produção (CI/CD)
+│   ├── Dockerfile              #   Imagem unificada (Node build → Python + nginx + rustac)
+│   ├── nginx.conf              #   Configuração nginx de produção
+│   └── entrypoint.sh           #   Entrypoint: rustac + nginx
+├── .github/workflows/          # GitHub Actions CI/CD
+│   └── prod.yml                #   Build → DockerHub → zelador → Swarm
+├── Dockerfile                  # Build da API STAC (rustac via pip, desenvolvimento)
+├── docker-compose.yml          # Orquestração dos 3 serviços (desenvolvimento)
 └── Justfile                    # Comandos de desenvolvimento e pipeline
 ```
