@@ -1,0 +1,10 @@
+.layout-content-wrapper {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.layout-content {
+    flex: 1;
+}

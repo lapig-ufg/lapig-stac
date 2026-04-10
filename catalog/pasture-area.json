@@ -1,0 +1,96 @@
+{
+  "type": "Collection",
+  "stac_version": "1.1.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/projection/v2.0.0/schema.json"
+  ],
+  "id": "pasture-area",
+  "title": "MapBiomas Col. 10 — Área de Pastagem",
+  "description": "Mapas anuais de extensão de pastagem cultivada no Brasil, derivados da Coleção 10 do MapBiomas (1985–2024). Classificação binária: presença/ausência de pastagem.",
+  "keywords": [
+    "pasture",
+    "mapbiomas",
+    "land-use",
+    "brazil",
+    "cerrado"
+  ],
+  "license": "CC-BY-SA-4.0",
+  "providers": [
+    {
+      "name": "LAPIG/UFG",
+      "description": "Laboratório de Processamento de Imagens e Geoprocessamento",
+      "roles": [
+        "producer",
+        "host"
+      ],
+      "url": "https://www.lapig.iesa.ufg.br"
+    },
+    {
+      "name": "MapBiomas",
+      "description": "Iniciativa MapBiomas — mapeamento anual de cobertura e uso do solo",
+      "roles": [
+        "producer"
+      ],
+      "url": "https://mapbiomas.org"
+    }
+  ],
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -74.021,
+          -34.041,
+          -32.392,
+          5.436
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "1985-01-01T00:00:00+00:00",
+          "2024-12-31T00:00:00+00:00"
+        ]
+      ]
+    }
+  },
+  "summaries": {
+    "gsd": [
+      30.0
+    ],
+    "classification:classes": [
+      {
+        "value": 0,
+        "label": "Sem dados",
+        "color": "#00000000"
+      },
+      {
+        "value": 1,
+        "label": "Pastagem",
+        "color": "#E8D74C"
+      }
+    ]
+  },
+  "links": [],
+  "assets": {
+    "style_sld": {
+      "href": "./styles/pasture-area.sld",
+      "type": "application/vnd.ogc.sld+xml",
+      "title": "Estilo SLD — MapBiomas Col. 10 — Área de Pastagem",
+      "roles": [
+        "style"
+      ]
+    },
+    "style_qml": {
+      "href": "./styles/pasture-area.qml",
+      "type": "application/x-qgis-style",
+      "title": "Estilo QML — MapBiomas Col. 10 — Área de Pastagem",
+      "roles": [
+        "style"
+      ]
+    }
+  },
+  "extra_fields": {
+    "lapig:layer_unit": "class"
+  }
+}

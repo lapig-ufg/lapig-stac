@@ -1,0 +1,14 @@
+{
+  "/api": {
+    "target": "http://localhost:7822",
+    "secure": false,
+    "pathRewrite": { "^/api": "" },
+    "changeOrigin": true
+  },
+  "/cog-proxy": {
+    "target": "https://s3.lapig.iesa.ufg.br",
+    "secure": true,
+    "pathRewrite": { "^/cog-proxy": "" },
+    "changeOrigin": true
+  }
+}

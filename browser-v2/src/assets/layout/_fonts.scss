@@ -1,0 +1,11 @@
+/* LAPIG STAC Browser — Fontes via Google Fonts CDN */
+/* Exo 2: títulos e display */
+/* DM Sans: body e UI */
+/* JetBrains Mono: dados, coordenadas, código */
+
+/* Fallback declarations — as fontes são carregadas via <link> no index.html */
+:root {
+    --font-display: 'Exo 2', system-ui, sans-serif;
+    --font-body: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}

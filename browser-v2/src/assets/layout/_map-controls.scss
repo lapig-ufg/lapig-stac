@@ -1,0 +1,24 @@
+/* Override de estilos OpenLayers para integração com tema LAPIG */
+
+.ol-viewport {
+    border-radius: inherit;
+}
+
+.ol-attribution {
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    font-size: 10px;
+    background: var(--surface-card);
+    opacity: 0.9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--text-color);
+
+    a {
+        color: var(--primary-color);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

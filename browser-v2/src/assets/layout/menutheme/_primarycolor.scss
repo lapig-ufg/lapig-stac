@@ -1,0 +1,19 @@
+.layout-primarycolor-menu {
+    --logo-color: var(--primary-color-text);
+    --menu-bg: linear-gradient(to bottom, #1a4d2e, #0f3d1f, #0a2a15);
+    --root-menuitem-text-color: rgba(255, 255, 255, 0.7);
+    --menuitem-text-color: rgba(255, 255, 255, 0.85);
+    --menuitem-icon-color: rgba(255, 255, 255, 0.7);
+    --menuitem-hover-bg-color: rgba(255, 255, 255, 0.1);
+    --popup-submenu-item-text-color: var(--text-color);
+    --popup-submenu-item-icon-color: var(--primary-color);
+    --popup-submenu-item-hover-bg-color: var(--surface-hover);
+}
+
+.layout-dark.layout-primarycolor-menu,
+.layout-dim.layout-primarycolor-menu {
+    --menu-bg: linear-gradient(to bottom, #0f2a18, #0a1f12, #06150c);
+    --root-menuitem-text-color: rgba(255, 255, 255, 0.6);
+    --menuitem-text-color: rgba(255, 255, 255, 0.8);
+    --menuitem-icon-color: rgba(255, 255, 255, 0.6);
+}

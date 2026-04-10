@@ -1,0 +1,27 @@
+[project]
+name = "lapig-stac-pipeline"
+version = "0.1.0"
+description = "LAPIG STAC pipeline: reads Excel metadata and generates STAC Items + GeoParquet"
+requires-python = ">=3.11"
+dependencies = [
+    "pystac>=1.11",
+    "geopandas>=1.0",
+    "openpyxl>=3.1",
+    "pyyaml>=6.0",
+    "click>=8.1",
+    "shapely>=2.0",
+    "pyarrow>=15.0",
+]
+
+[project.optional-dependencies]
+validate = ["stac-validator>=3.4"]
+
+[project.scripts]
+lapig-stac = "pipeline.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pipeline"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

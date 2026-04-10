@@ -1,0 +1,197 @@
+{
+    "app": {
+        "title": "LAPIG STAC Browser",
+        "subtitle": "Geospatial Data Catalog"
+    },
+    "nav": {
+        "navigation": "Navigation",
+        "catalog": "Catalog",
+        "collections": "Collections",
+        "search": "Search",
+        "searchData": "Search data",
+        "map": "Map",
+        "about": "About",
+        "back": "Back",
+        "backToCatalog": "Back to catalog",
+        "backToCollection": "Back to collection",
+        "breadcrumb": "Breadcrumb navigation"
+    },
+    "catalog": {
+        "overline": "Catalog collections",
+        "title": "Explore Data",
+        "empty": "No collections found in the catalog.",
+        "errorLoad": "Error loading collections. Check if the STAC API is accessible."
+    },
+    "collection": {
+        "overline": "Collection",
+        "items": "Items",
+        "itemsEmpty": "No items found in this collection.",
+        "errorLoad": "Error loading collection \"{{id}}\".",
+        "errorParams": "Collection identifier not provided."
+    },
+    "item": {
+        "overline": "Item",
+        "cloudCover": "Cloud cover",
+        "tabs": {
+            "metadata": "Metadata",
+            "assets": "Assets",
+            "json": "JSON",
+            "api": "API"
+        },
+        "errorLoad": "Error loading item \"{{itemId}}\" from collection \"{{collectionId}}\".",
+        "errorParams": "Collection or item identifiers not provided."
+    },
+    "search": {
+        "title": "Search Data",
+        "overline": "Advanced search",
+        "placeholder": "Search terms...",
+        "placeholderDisabled": "Search... (coming soon)",
+        "topbarPlaceholder": "Search collections and items...",
+        "searching": "Searching...",
+        "noResultsFor": "No results for \"{{query}}\"",
+        "advancedFor": "Advanced search for \"{{query}}\"",
+        "sectCollections": "Collections",
+        "sectItems": "Items",
+        "hintNavigate": "navigate",
+        "hintSelect": "select",
+        "hintClose": "close",
+        "collectionLabel": "Collection: {{name}}",
+        "dateLabel": "Date: {{date}}",
+        "filters": "Filters",
+        "temporal": "Temporal extent",
+        "spatial": "Spatial extent",
+        "spatialEnable": "Filter by map area",
+        "collections": "Collections",
+        "freeText": "Free text",
+        "submit": "Search",
+        "reset": "Clear filters",
+        "results": "Results",
+        "resultCount": "{{count}} item(s) found",
+        "noResults": "No results found. Try adjusting the filters.",
+        "dateFrom": "From",
+        "dateTo": "To",
+        "areaSelected": "Selected area:",
+        "areaRemove": "Remove area",
+        "instruction1": "Use the filters above to search for geospatial data.",
+        "instruction2": "You can filter by text, time period, collection or map area.",
+        "errorSearch": "Error executing search."
+    },
+    "map": {
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "basemapOsm": "OpenStreetMap",
+        "basemapSatellite": "Satellite",
+        "label": "Interactive map",
+        "controls": "Map controls",
+        "basemapSelection": "Basemap selection",
+        "drawLabel": "Draw the search area on the map",
+        "drawTools": "Drawing tools",
+        "drawRectangle": "Draw rectangle",
+        "drawPolygon": "Draw polygon",
+        "drawRectangleHint": "Click and drag to draw the search rectangle",
+        "drawPolygonHint": "Click on vertices. Double-click to finish.",
+        "clearArea": "Clear drawn area"
+    },
+    "metadata": {
+        "groups": {
+            "core": "General properties",
+            "eo": "Earth Observation (EO)",
+            "sar": "SAR",
+            "proj": "Projection",
+            "view": "View geometry",
+            "sat": "Satellite",
+            "raster": "Raster",
+            "file": "File",
+            "other": "Other"
+        },
+        "empty": "No metadata available.",
+        "copy": "Copy"
+    },
+    "styles": {
+        "title": "Styles",
+        "subtitle": "Rendering styles available for this collection",
+        "download": "Download",
+        "copyUrl": "Copy URL",
+        "sld": "SLD (Styled Layer Descriptor)",
+        "qml": "QML (QGIS Style)",
+        "empty": "No styles available."
+    },
+    "assets": {
+        "title": "Assets",
+        "empty": "No assets available.",
+        "columns": {
+            "asset": "Asset",
+            "type": "Type",
+            "roles": "Roles",
+            "size": "Size",
+            "actions": "Actions"
+        },
+        "download": "Download",
+        "copyUrl": "Copy URL"
+    },
+    "json": {
+        "copy": "Copy JSON",
+        "copied": "Copied!"
+    },
+    "api": {
+        "title": "Programmatic access",
+        "overline": "Code snippets",
+        "installHint": "Install dependency",
+        "copied": "Copied!",
+        "noCogFound": "No COG asset found in this item."
+    },
+    "commandPalette": {
+        "placeholder": "Search collections, actions, navigation...",
+        "sections": {
+            "collections": "Collections",
+            "actions": "Actions",
+            "navigation": "Navigation"
+        },
+        "actions": {
+            "toggleDark": "Toggle dark mode",
+            "goToCatalog": "Go to catalog",
+            "goToSearch": "Go to search"
+        },
+        "noResults": "No results for \"{{query}}\"."
+    },
+    "theme": {
+        "light": "Light mode",
+        "dark": "Dark mode"
+    },
+    "pagination": {
+        "next": "Next",
+        "prev": "Previous"
+    },
+    "clipboard": {
+        "success": "Copied!",
+        "successDetail": "{{label}} copied to clipboard.",
+        "error": "Error",
+        "errorDetail": "Could not copy to clipboard."
+    },
+    "topbar": {
+        "menuMode": "Menu type",
+        "settings": "Settings",
+        "language": "Language"
+    },
+    "layout": {
+        "menuStatic": "Static",
+        "menuOverlay": "Overlay",
+        "menuSlim": "Slim",
+        "menuSlimPlus": "Slim+",
+        "menuHorizontal": "Horizontal"
+    },
+    "footer": {
+        "title": "LAPIG STAC",
+        "subtitle1": "Geospatial Data Catalog",
+        "subtitle2": "Image Processing and",
+        "subtitle3": "Geoprocessing Laboratory — UFG",
+        "usefulLinks": "Useful links",
+        "portalLapig": "LAPIG Portal",
+        "githubRepo": "GitHub Repository",
+        "stacApi": "STAC API",
+        "partners": "Partners",
+        "allRights": "All rights reserved.",
+        "termsOfUse": "Terms of Use",
+        "privacyPolicy": "Privacy Policy"
+    }
+}

@@ -1,0 +1,99 @@
+# ===========================================================================
+# LAPIG STAC — Definição de coleções (MapBiomas Collection 10)
+#
+# Segue o padrão de schema extraído do ifad-capeo Excel.
+# Cada entrada gera uma STAC Collection + Items a partir dos TIFFs locais.
+# ===========================================================================
+
+catalog:
+  id: lapig-stac
+  title: LAPIG Data Catalog
+  description: "Catálogo de dados geoespaciais do LAPIG/UFG — PastoLegal"
+
+providers:
+  lapig:
+    name: "LAPIG/UFG"
+    description: "Laboratório de Processamento de Imagens e Geoprocessamento"
+    roles: ["producer", "host"]
+    url: "https://www.lapig.iesa.ufg.br"
+  mapbiomas:
+    name: "MapBiomas"
+    description: "Iniciativa MapBiomas — mapeamento anual de cobertura e uso do solo"
+    roles: ["producer"]
+    url: "https://mapbiomas.org"
+
+collections:
+  - id: pasture-area
+    title: "MapBiomas Col. 10 — Área de Pastagem"
+    description: >-
+      Mapas anuais de extensão de pastagem cultivada no Brasil, derivados da
+      Coleção 10 do MapBiomas (1985–2024). Classificação binária:
+      presença/ausência de pastagem.
+    license: "CC-BY-SA-4.0"
+    keywords:
+      - pasture
+      - mapbiomas
+      - land-use
+      - brazil
+      - cerrado
+    source_dir: "MapasPastagem_Col10/Pastagem"
+    filename_pattern: "mapbiomas_pasture_(\\d{4})\\.tif"
+    providers_ref:
+      - lapig
+      - mapbiomas
+    spatial_extent: [-74.021, -34.041, -32.392, 5.436]
+    gsd: 30.0
+    data_type: uint8
+    nodata: 0
+    unit: class
+    styles:
+      sld: "styles/pasture-area.sld"
+      qml: "styles/pasture-area.qml"
+    classification:
+      - value: 0
+        label: "Sem dados"
+        color: "#00000000"
+      - value: 1
+        label: "Pastagem"
+        color: "#E8D74C"
+
+  - id: pasture-vigor
+    title: "MapBiomas Col. 10 — Vigor de Pastagem"
+    description: >-
+      Mapas anuais de vigor de pastagem no Brasil, derivados da
+      Coleção 10 do MapBiomas (2000–2024). Classificação em níveis:
+      baixo, médio e alto vigor.
+    license: "CC-BY-SA-4.0"
+    keywords:
+      - pasture
+      - vigor
+      - degradation
+      - mapbiomas
+      - brazil
+      - cerrado
+    source_dir: "MapasPastagem_Col10/Vigor"
+    filename_pattern: "mapbiomas_pasture_vigor_(\\d{4})\\.tif"
+    providers_ref:
+      - lapig
+      - mapbiomas
+    spatial_extent: [-74.021, -34.041, -32.392, 5.436]
+    gsd: 30.0
+    data_type: uint8
+    nodata: 0
+    unit: class
+    styles:
+      sld: "styles/pasture-vigor.sld"
+      qml: "styles/pasture-vigor.qml"
+    classification:
+      - value: 0
+        label: "Sem dados"
+        color: "#00000000"
+      - value: 1
+        label: "Baixo vigor"
+        color: "#D32F2F"
+      - value: 2
+        label: "Médio vigor"
+        color: "#FFB300"
+      - value: 3
+        label: "Alto vigor"
+        color: "#388E3C"

@@ -1,0 +1,197 @@
+{
+    "app": {
+        "title": "LAPIG STAC Browser",
+        "subtitle": "Catálogo de Dados Geoespaciais"
+    },
+    "nav": {
+        "navigation": "Navegação",
+        "catalog": "Catálogo",
+        "collections": "Coleções",
+        "search": "Buscar",
+        "searchData": "Buscar dados",
+        "map": "Mapa",
+        "about": "Sobre",
+        "back": "Voltar",
+        "backToCatalog": "Voltar ao catálogo",
+        "backToCollection": "Voltar à coleção",
+        "breadcrumb": "Navegação estrutural"
+    },
+    "catalog": {
+        "overline": "Coleções do catálogo",
+        "title": "Explorar Dados",
+        "empty": "Nenhuma coleção encontrada no catálogo.",
+        "errorLoad": "Erro ao carregar coleções. Verifique se a API STAC está acessível."
+    },
+    "collection": {
+        "overline": "Coleção",
+        "items": "Items",
+        "itemsEmpty": "Nenhum item encontrado nesta coleção.",
+        "errorLoad": "Erro ao carregar a coleção \"{{id}}\".",
+        "errorParams": "Identificador da coleção não informado."
+    },
+    "item": {
+        "overline": "Item",
+        "cloudCover": "Cobertura de nuvens",
+        "tabs": {
+            "metadata": "Metadados",
+            "assets": "Assets",
+            "json": "JSON",
+            "api": "API"
+        },
+        "errorLoad": "Erro ao carregar o item \"{{itemId}}\" da coleção \"{{collectionId}}\".",
+        "errorParams": "Identificadores de coleção ou item não informados."
+    },
+    "search": {
+        "title": "Buscar Dados",
+        "overline": "Busca avançada",
+        "placeholder": "Termos de busca...",
+        "placeholderDisabled": "Buscar... (em breve)",
+        "topbarPlaceholder": "Buscar coleções e itens...",
+        "searching": "Buscando...",
+        "noResultsFor": "Nenhum resultado para \"{{query}}\"",
+        "advancedFor": "Busca avançada para \"{{query}}\"",
+        "sectCollections": "Coleções",
+        "sectItems": "Itens",
+        "hintNavigate": "navegar",
+        "hintSelect": "selecionar",
+        "hintClose": "fechar",
+        "collectionLabel": "Coleção: {{name}}",
+        "dateLabel": "Data: {{date}}",
+        "filters": "Filtros",
+        "temporal": "Período temporal",
+        "spatial": "Extensão espacial",
+        "spatialEnable": "Filtrar por área no mapa",
+        "collections": "Coleções",
+        "freeText": "Texto livre",
+        "submit": "Buscar",
+        "reset": "Limpar filtros",
+        "results": "Resultados",
+        "resultCount": "{{count}} item(ns) encontrado(s)",
+        "noResults": "Nenhum resultado encontrado. Tente ajustar os filtros.",
+        "dateFrom": "De",
+        "dateTo": "Até",
+        "areaSelected": "Área selecionada:",
+        "areaRemove": "Remover área",
+        "instruction1": "Utilize os filtros acima para buscar dados geoespaciais.",
+        "instruction2": "Você pode filtrar por texto, período, coleção ou área no mapa.",
+        "errorSearch": "Erro ao executar a busca."
+    },
+    "map": {
+        "zoomIn": "Ampliar",
+        "zoomOut": "Reduzir",
+        "basemapOsm": "OpenStreetMap",
+        "basemapSatellite": "Satélite",
+        "label": "Mapa interativo",
+        "controls": "Controles do mapa",
+        "basemapSelection": "Seleção de mapa base",
+        "drawLabel": "Desenhe a área de busca no mapa",
+        "drawTools": "Ferramentas de desenho",
+        "drawRectangle": "Desenhar retângulo",
+        "drawPolygon": "Desenhar polígono",
+        "drawRectangleHint": "Clique e arraste para desenhar o retângulo de busca",
+        "drawPolygonHint": "Clique nos vértices do polígono. Duplo-clique para finalizar.",
+        "clearArea": "Limpar área desenhada"
+    },
+    "metadata": {
+        "groups": {
+            "core": "Propriedades gerais",
+            "eo": "Earth Observation (EO)",
+            "sar": "SAR",
+            "proj": "Projeção",
+            "view": "Geometria de visada",
+            "sat": "Satélite",
+            "raster": "Raster",
+            "file": "Arquivo",
+            "other": "Outros"
+        },
+        "empty": "Sem metadados disponíveis.",
+        "copy": "Copiar"
+    },
+    "styles": {
+        "title": "Estilos",
+        "subtitle": "Estilos de renderização disponíveis para esta coleção",
+        "download": "Download",
+        "copyUrl": "Copiar URL",
+        "sld": "SLD (Styled Layer Descriptor)",
+        "qml": "QML (QGIS Style)",
+        "empty": "Nenhum estilo disponível."
+    },
+    "assets": {
+        "title": "Assets",
+        "empty": "Nenhum asset disponível.",
+        "columns": {
+            "asset": "Asset",
+            "type": "Tipo",
+            "roles": "Roles",
+            "size": "Tamanho",
+            "actions": "Ações"
+        },
+        "download": "Download",
+        "copyUrl": "Copiar URL"
+    },
+    "json": {
+        "copy": "Copiar JSON",
+        "copied": "Copiado!"
+    },
+    "api": {
+        "title": "Acesso programático",
+        "overline": "Snippets de código",
+        "installHint": "Instalar dependência",
+        "copied": "Copiado!",
+        "noCogFound": "Nenhum asset COG encontrado neste item."
+    },
+    "commandPalette": {
+        "placeholder": "Buscar coleções, ações, navegação...",
+        "sections": {
+            "collections": "Coleções",
+            "actions": "Ações",
+            "navigation": "Navegação"
+        },
+        "actions": {
+            "toggleDark": "Alternar modo escuro",
+            "goToCatalog": "Ir para o catálogo",
+            "goToSearch": "Ir para busca"
+        },
+        "noResults": "Nenhum resultado para \"{{query}}\"."
+    },
+    "theme": {
+        "light": "Modo claro",
+        "dark": "Modo escuro"
+    },
+    "pagination": {
+        "next": "Próxima",
+        "prev": "Anterior"
+    },
+    "clipboard": {
+        "success": "Copiado!",
+        "successDetail": "{{label}} copiado para a área de transferência.",
+        "error": "Erro",
+        "errorDetail": "Não foi possível copiar para a área de transferência."
+    },
+    "topbar": {
+        "menuMode": "Tipo de menu",
+        "settings": "Configurações",
+        "language": "Idioma"
+    },
+    "layout": {
+        "menuStatic": "Estático",
+        "menuOverlay": "Overlay",
+        "menuSlim": "Slim",
+        "menuSlimPlus": "Slim+",
+        "menuHorizontal": "Horizontal"
+    },
+    "footer": {
+        "title": "LAPIG STAC",
+        "subtitle1": "Catálogo de Dados Geoespaciais",
+        "subtitle2": "Laboratório de Processamento de Imagens",
+        "subtitle3": "e Geoprocessamento — UFG",
+        "usefulLinks": "Links úteis",
+        "portalLapig": "Portal LAPIG",
+        "githubRepo": "Repositório GitHub",
+        "stacApi": "STAC API",
+        "partners": "Parceiros",
+        "allRights": "Todos os direitos reservados.",
+        "termsOfUse": "Termos de Uso",
+        "privacyPolicy": "Política de Privacidade"
+    }
+}

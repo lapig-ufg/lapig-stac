@@ -1,0 +1,20 @@
+/* Curvas de nível — background pattern sutil da identidade visual LAPIG */
+.layout-content-wrapper {
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url('/layout/images/contour-lines.svg');
+        background-repeat: repeat;
+        background-size: 400px;
+        opacity: 0.04;
+        pointer-events: none;
+        z-index: 0;
+    }
+}
+
+:root[class*='app-dark'] .layout-content-wrapper::before {
+    opacity: 0.03;
+}

@@ -1,0 +1,48 @@
+@import 'tailwindcss';
+
+@plugin 'tailwindcss-primeui';
+
+@custom-variant dark (&:where([class*="app-dark"], [class*="app-dark"] *));
+
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-2xl: 1920px;
+
+  /* LAPIG Typography */
+  --font-display: 'Exo 2', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* LAPIG Brand Colors */
+  --color-cerrado-green: #429B4D;
+  --color-deep-forest: #1B3A2A;
+  --color-cream: #F6F1E7;
+  --color-tech-teal: #2A9D8F;
+  --color-cerrado-gold: #C4933F;
+  --color-earth-brown: #6B4C3B;
+  --color-alert-red: #C4533A;
+  --color-light-green: #6DB56A;
+  --color-gold-pale: #EDD9A3;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}

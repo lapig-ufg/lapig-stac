@@ -1,0 +1,51 @@
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+*.whl
+
+# === Node.js ===
+node_modules/
+.angular/
+dist/
+.npm/
+*.tsbuildinfo
+
+# === Dados geoespaciais (grandes) ===
+data/
+catalog/cogs/
+catalog/thumbnails/
+catalog/items/
+catalog/collections/
+catalog/items.parquet
+catalog/items_rustac.parquet
+catalog/stac_all.ndjson
+catalog/catalog.json
+catalog/collections.json
+catalog/lapig-catalog.json
+
+# === Ambiente ===
+.env
+.env.local
+.env.*.local
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Docker ===
+minio-data/
+
+# === Legado ===
+target/
+Cargo.lock
+.claude/
