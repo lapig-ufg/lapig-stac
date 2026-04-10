@@ -61,12 +61,8 @@ import { MapCanvasComponent } from '@/app/features/map/map-canvas.component';
         }
         .filter-dates {
             display: flex;
+            flex-direction: column;
             gap: 0.5rem;
-            align-items: center;
-        }
-        .filter-dates-separator {
-            color: var(--text-color-secondary);
-            font-size: 0.8rem;
         }
         :host ::ng-deep .filter-dates .p-datepicker {
             width: 100%;
@@ -122,7 +118,6 @@ import { MapCanvasComponent } from '@/app/features/map/map-canvas.component';
                             [showIcon]="true"
                             styleClass="w-full"
                         />
-                        <span class="filter-dates-separator">—</span>
                         <p-datepicker
                             [(ngModel)]="dateTo"
                             [placeholder]="'search.dateTo' | translate"
