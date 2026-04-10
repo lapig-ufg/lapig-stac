@@ -122,41 +122,12 @@ lapig-stac/
 │   ├── styles/               #   SLD/QML servidos pelo Nginx
 │   ├── pasture-area.json     #   Coleção limpa para rustac
 │   └── pasture-vigor.json    #   Coleção limpa para rustac
-├── video/                     # Vídeo institucional (Remotion)
-│   ├── src/                   #   Composições e cenas
-│   └── public/                #   Screenshots do browser
 ├── docs/                      # Documentação técnica
 ├── infra/nginx/               # Configuração do proxy reverso
 ├── Dockerfile                 # Build da API STAC (rustac via pip)
 ├── docker-compose.yml         # Orquestração dos 3 serviços
 └── Justfile                   # Task runner para pipeline e Docker
 ```
-
-## Vídeo de apresentação
-
-O projeto inclui um vídeo institucional criado com [Remotion](https://remotion.dev/) que demonstra as principais funcionalidades do Browser STAC.
-
-### Pré-visualizar no Remotion Studio
-
-```bash
-cd video
-npm install
-npm start
-```
-
-### Renderizar o vídeo (MP4)
-
-```bash
-cd video
-npm run build
-# Saída: video/out/lapig-stac.mp4
-```
-
-O vídeo apresenta:
-- **Explorar Dados** — catálogo de coleções STAC
-- **Coleções Detalhadas** — itens anuais com thumbnails e mapa
-- **Busca Espacial** — filtros geográficos e temporais
-- **Detalhe do Item** — metadados, renderização WebGL e assets
 
 ## Documentação
 
