@@ -85,7 +85,7 @@
   "links": [],
   "assets": {
     "style_sld": {
-      "href": "./styles/pasture-vigor.sld",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor/styles/pasture-vigor.sld",
       "type": "application/vnd.ogc.sld+xml",
       "title": "Estilo SLD — MapBiomas Col. 10 — Vigor de Pastagem",
       "roles": [
@@ -93,7 +93,7 @@
       ]
     },
     "style_qml": {
-      "href": "./styles/pasture-vigor.qml",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor/styles/pasture-vigor.qml",
       "type": "application/x-qgis-style",
       "title": "Estilo QML — MapBiomas Col. 10 — Vigor de Pastagem",
       "roles": [

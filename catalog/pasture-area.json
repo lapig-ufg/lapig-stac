@@ -74,7 +74,7 @@
   "links": [],
   "assets": {
     "style_sld": {
-      "href": "./styles/pasture-area.sld",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-area/styles/pasture-area.sld",
       "type": "application/vnd.ogc.sld+xml",
       "title": "Estilo SLD — MapBiomas Col. 10 — Área de Pastagem",
       "roles": [
@@ -82,7 +82,7 @@
       ]
     },
     "style_qml": {
-      "href": "./styles/pasture-area.qml",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-area/styles/pasture-area.qml",
       "type": "application/x-qgis-style",
       "title": "Estilo QML — MapBiomas Col. 10 — Área de Pastagem",
       "roles": [
