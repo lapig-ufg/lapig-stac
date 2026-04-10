@@ -1,6 +1,6 @@
 # =============================================================================
 # LAPIG STAC — Imagem unificada de produção
-# Multi-stage: Angular build + rustac binary + nginx
+# Multi-stage: Angular build (Node) + Python/rustac + nginx
 # =============================================================================
 
 # Stage 1: Build Angular
@@ -14,20 +14,15 @@ RUN npm ci --ignore-scripts
 COPY browser-v2/ .
 RUN npx ng build --configuration=production
 
-# Stage 2: Extrair binário rustac (Rust estático via PyPI)
-FROM python:3.12-slim AS rustac-build
-
-RUN pip install --no-cache-dir rustac==0.9.8
-
-# Stage 3: Imagem final — nginx + rustac + SPA
-FROM nginx:bookworm
+# Stage 2: Imagem final — Python + nginx + rustac + SPA
+FROM python:3.12-slim
 
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y curl && \
+    apt-get install --no-install-recommends -y nginx curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Binário rustac (Rust estático, ~30 MB)
-COPY --from=rustac-build /usr/local/bin/rustac /usr/local/bin/rustac
+# rustac (módulo Python com extensão Rust .abi3.so)
+RUN pip install --no-cache-dir rustac==0.9.8
 
 # SPA Angular
 COPY --from=browser-build /app/dist/apollo-ng/browser/ /usr/share/nginx/html/
