@@ -25,6 +25,8 @@ catalog/items_rustac.parquet
 catalog/stac_all.ndjson
 catalog/catalog.json
 catalog/collections.json
+catalog/collections.ndjson
+catalog/items.ndjson
 catalog/lapig-catalog.json
 
 # Exceções: arquivos pequenos do catálogo necessários ao build Docker

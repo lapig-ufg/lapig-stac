@@ -251,5 +251,51 @@ def run_all(data_dir: str, output: str, base_url: str) -> None:
     click.echo("Pipeline complete.")
 
 
+# ---------------------------------------------------------------------------
+# pgstac — export ndjson e load no banco
+# ---------------------------------------------------------------------------
+
+@main.command("export-ndjson")
+@click.option(
+    "--catalog-dir", "-d",
+    default="catalog",
+    type=click.Path(exists=True),
+    help="Diretório raiz do catálogo (contém collections/ e items/).",
+)
+def export_ndjson_cmd(catalog_dir: str) -> None:
+    """Emite collections.ndjson e items.ndjson a partir dos JSONs do catálogo."""
+    from pipeline.load_pgstac import export_ndjson
+
+    col_path, items_path = export_ndjson(catalog_dir)
+    click.echo(f"ndjson emitido:\n  {col_path}\n  {items_path}")
+
+
+@main.command("load-pgstac")
+@click.option(
+    "--catalog-dir", "-d",
+    default="catalog",
+    type=click.Path(exists=True),
+    help="Diretório raiz do catálogo.",
+)
+@click.option(
+    "--dsn",
+    envvar="DATABASE_URL",
+    required=True,
+    help="String de conexão Postgres (lê DATABASE_URL do ambiente se não passada).",
+)
+@click.option(
+    "--method",
+    default="upsert",
+    type=click.Choice(["insert", "ignore", "upsert", "delsert", "insert_ignore"]),
+    help="Estratégia de escrita (padrão: upsert).",
+)
+def load_pgstac_cmd(catalog_dir: str, dsn: str, method: str) -> None:
+    """Emite ndjson (se faltar) e carrega o catálogo em uma instância pgstac."""
+    from pipeline.load_pgstac import load_to_pgstac
+
+    collections, items = load_to_pgstac(catalog_dir, dsn=dsn, method=method)
+    click.echo(f"Carregado: {collections} collections, {items} items (method={method}).")
+
+
 if __name__ == "__main__":
     main()
