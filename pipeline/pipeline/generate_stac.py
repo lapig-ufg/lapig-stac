@@ -305,24 +305,28 @@ def _make_item_dict(
         {"rel": "collection", "href": collection_url, "type": "application/json"},
     ]
 
-    # Stylesheets (SLD, QML) — servidos sob o domínio oficial da API.
-    # São anexados ao Item (e não à Collection) para que o documento do
-    # Item seja autossuficiente em clientes que não seguem rel=collection.
+    # Stylesheets (SLD, QML) — anexados como assets do Item (role: "style"),
+    # de modo que aparecem na aba "Assets" do STAC Browser e ficam coerentes
+    # com a expectativa "todo recurso do Item está em assets". O role "style"
+    # não consta na lista oficial de roles STAC, mas a spec permite roles
+    # arbitrários (a convenção é usada por vários catálogos STAC).
     title_suffix = f" — {collection_title}" if collection_title else ""
-    for sld_path in (sld_urls or []):
-        links.append({
-            "rel": "stylesheet",
-            "type": "application/vnd.ogc.sld+xml",
+    for idx, sld_path in enumerate(sld_urls or []):
+        key = "style_sld" if idx == 0 else f"style_sld_{idx + 1}"
+        assets[key] = {
             "href": f"{collection_url}/styles/{Path(sld_path).name}",
+            "type": "application/vnd.ogc.sld+xml",
             "title": f"Estilo SLD{title_suffix}",
-        })
-    for qml_path in (qml_urls or []):
-        links.append({
-            "rel": "stylesheet",
-            "type": "application/x-qgis-style",
+            "roles": ["style"],
+        }
+    for idx, qml_path in enumerate(qml_urls or []):
+        key = "style_qml" if idx == 0 else f"style_qml_{idx + 1}"
+        assets[key] = {
             "href": f"{collection_url}/styles/{Path(qml_path).name}",
+            "type": "application/x-qgis-style",
             "title": f"Estilo QML{title_suffix}",
-        })
+            "roles": ["style"],
+        }
 
     return {
         "type": "Feature",
@@ -386,26 +390,9 @@ def generate_catalog(
             "title": rec.title,
         })
 
-    # Stylesheets no catalog: uma entrada por arquivo de estilo de cada
-    # collection, com title identificando a coleção correspondente. Dá aos
-    # clientes que abrem apenas a landing page uma visão completa dos
-    # estilos disponíveis sem precisar navegar para cada collection/item.
-    for rec in parse_result.collections:
-        collection_url = f"{API_BASE_URL}/collections/{rec.id}"
-        for sld_path in rec.sld_urls:
-            catalog_dict["links"].append({
-                "rel": "stylesheet",
-                "type": "application/vnd.ogc.sld+xml",
-                "href": f"{collection_url}/styles/{Path(sld_path).name}",
-                "title": f"Estilo SLD — {rec.title}",
-            })
-        for qml_path in rec.qml_urls:
-            catalog_dict["links"].append({
-                "rel": "stylesheet",
-                "type": "application/x-qgis-style",
-                "href": f"{collection_url}/styles/{Path(qml_path).name}",
-                "title": f"Estilo QML — {rec.title}",
-            })
+    # Os estilos SLD/QML são expostos diretamente em cada Item como
+    # `assets` com role "style" (ver _make_item_dict). Mantemos o catálogo
+    # raiz apenas com links navegacionais.
 
     _write_json(out / "catalog.json", catalog_dict)
 

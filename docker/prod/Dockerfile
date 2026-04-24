@@ -42,15 +42,9 @@ RUN pip install --no-cache-dir --root-user-action=ignore \
 COPY --from=browser-build /app/dist/apollo-ng/browser/ /usr/share/nginx/html/
 
 # Catálogo — estilos (servidos pelo nginx) e ndjson (ingestão no boot).
-# A landing page é enriquecida em runtime pelo middleware em
-# `stac_api_app.py`, que consulta o próprio pgstac — nenhum catálogo
-# estático é copiado.
 COPY catalog/styles/ /app/catalog/styles/
 COPY --from=catalog-ndjson /catalog/collections.ndjson /app/catalog/collections.ndjson
 COPY --from=catalog-ndjson /catalog/items.ndjson /app/catalog/items.ndjson
-
-# Wrapper do stac-fastapi-pgstac com middleware de links extras no landing.
-COPY docker/stac_api_app.py /app/stac_api_app.py
 
 # version.json (gerado pelo CI)
 COPY version.json /app/version.json

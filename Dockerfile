@@ -21,10 +21,6 @@ COPY pipeline/pyproject.toml pipeline/README.md* /app/pipeline/
 COPY pipeline/pipeline /app/pipeline/pipeline
 RUN pip install --no-cache-dir --root-user-action=ignore /app/pipeline
 
-# Wrapper com middleware de links extras no landing (usa catalog.json
-# montado via volume em /catalog).
-COPY docker/stac_api_app.py /app/stac_api_app.py
-
 # Entrypoint dev: aguarda Postgres → pypgstac migrate → load → uvicorn.
 COPY docker/dev/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

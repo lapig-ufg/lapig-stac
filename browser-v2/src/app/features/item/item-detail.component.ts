@@ -153,7 +153,7 @@ import { createDefaultCogStyle } from '@/app/features/map/models/cog-style.types
                     </p-tablist>
                     <p-tabpanels>
                         <p-tabpanel value="assets">
-                            <app-asset-list [assets]="item.assets" />
+                            <app-asset-list [assets]="dataAssets()" />
                         </p-tabpanel>
                         <p-tabpanel value="api">
                             <app-api-snippet
@@ -189,27 +189,19 @@ export class ItemDetailComponent {
     collectionAssets = computed(() => this.collection()?.assets ?? null);
 
     /**
-     * Após o redesenho, os estilos (SLD/QML) são expostos como
-     * `links[rel=stylesheet]` nos próprios Items (não mais em
-     * `collection.assets`). Para reaproveitar o `<app-style-list>` sem
-     * alterar sua interface, projetamos os links em um Record no formato
-     * StacAsset com `roles: ['style']`.
+     * Extrai apenas os assets com role "style" do item, para alimentar o
+     * `<app-style-list>` sem incluir assets de dados/thumbnail.
      */
     itemStylesheets = computed<Record<string, StacAsset> | null>(() => {
-        const item = this.item();
-        if (!item) return null;
-        const entries: Record<string, StacAsset> = {};
-        for (const link of item.links ?? []) {
-            if (link.rel !== 'stylesheet' || !link.href) continue;
-            const key = decodeURIComponent(link.href.split('/').pop() || link.href);
-            entries[key] = {
-                href: link.href,
-                type: link.type,
-                title: link.title,
-                roles: ['style']
-            };
+        const assets = this.item()?.assets;
+        if (!assets) return null;
+        const filtered: Record<string, StacAsset> = {};
+        for (const [key, asset] of Object.entries(assets)) {
+            if (asset.roles?.includes('style')) {
+                filtered[key] = asset;
+            }
         }
-        return Object.keys(entries).length > 0 ? entries : null;
+        return Object.keys(filtered).length > 0 ? filtered : null;
     });
 
     collectionId: string;
@@ -226,10 +218,23 @@ export class ItemDetailComponent {
 
     itemBbox = computed<number[] | null>(() => this.item()?.bbox ?? null);
 
-    assetCount = computed(() => {
-        const item = this.item();
-        return item ? Object.keys(item.assets).length : 0;
+    /**
+     * Assets exibidos na aba "Assets" — excluímos os de role "style"
+     * porque esses já aparecem na seção "Estilos" ao lado do mapa, e
+     * incluí-los nas duas visões duplicaria informação para o usuário.
+     */
+    dataAssets = computed<Record<string, StacAsset>>(() => {
+        const assets = this.item()?.assets ?? {};
+        const filtered: Record<string, StacAsset> = {};
+        for (const [key, asset] of Object.entries(assets)) {
+            if (!asset.roles?.includes('style')) {
+                filtered[key] = asset;
+            }
+        }
+        return filtered;
     });
+
+    assetCount = computed(() => Object.keys(this.dataAssets()).length);
 
     stacItemUrl = computed(() => `${environment.stacApiUrl}/collections/${this.collectionId}/items/${this.itemId}`);
 
@@ -329,22 +334,21 @@ export class ItemDetailComponent {
         // Auto-aplicação do estilo SLD:
         //
         // Mesmo com classification:classes na Collection (que o effect acima
-        // já aplicou), procuramos o primeiro `links[rel=stylesheet]` do Item
-        // com media type SLD e o baixamos para sobrescrever as classes com
-        // as do SLD. Isso garante que a cartografia oficial do serviço
-        // (OGC SLD) vire o default do mapa — sem o usuário clicar em
-        // "Aplicar ao mapa".
+        // já aplicou), procuramos o primeiro asset com role "style" e media
+        // type SLD e o baixamos para sobrescrever as classes com as do SLD.
+        // Isso garante que a cartografia oficial do serviço (OGC SLD) vire
+        // o default do mapa — sem o usuário clicar em "Aplicar ao mapa".
         effect(() => {
             const item = this.item();
             const bands = this.cogBands();
             if (!item || this.sldAutoApplied) return;
-            const sldLink = (item.links ?? []).find(
-                (l) => l.rel === 'stylesheet' && (l.type ?? '').includes('sld')
+            const sldAsset = Object.values(item.assets ?? {}).find(
+                (a) => a.roles?.includes('style') && (a.type ?? '').includes('sld')
             );
-            if (!sldLink?.href) return;
+            if (!sldAsset?.href) return;
 
             this.sldAutoApplied = true;
-            this.http.get(sldLink.href, { responseType: 'text' }).pipe(
+            this.http.get(sldAsset.href, { responseType: 'text' }).pipe(
                 takeUntilDestroyed(this.destroyRef)
             ).subscribe({
                 next: (xml) => {
