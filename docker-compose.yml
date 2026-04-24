@@ -38,6 +38,10 @@ services:
       # direta http://localhost:7822/* continua funcionando (o routing
       # não muda), apenas os links nas respostas passam a vir prefixados.
       STAC_ROOT_PATH: /api
+      # Hidratação no lado da API garante que campos exigidos pela spec
+      # STAC 1.1.0 (como `datetime: null`) voltem nas respostas mesmo
+      # quando o pgstac remove nulls no armazenamento dehidratado.
+      USE_API_HYDRATE: "true"
     volumes:
       # Catálogo montado read-only; o entrypoint gera ndjson aqui se faltarem
       # e chama pypgstac load no boot.
