@@ -1,8 +1,8 @@
 """Enrich STAC Items with real metadata extracted from COG files.
 
 Reads each COG and updates the corresponding STAC Item JSON with:
-  - proj:epsg, proj:shape, proj:transform (from CRS/GeoTransform)
-  - raster:bands (data_type, nodata, statistics)
+  - proj:code, proj:shape, proj:transform (from CRS/GeoTransform)
+  - asset.bands (data_type, nodata, statistics) — STAC 1.1.0 core
   - file:size, file:checksum (SHA-256 multihash)
   - Precise bbox and geometry (from GeoTransform, not hardcoded)
   - properties.created / properties.updated timestamps
@@ -27,9 +27,30 @@ gdal.UseExceptions()
 
 STAC_EXTENSIONS = [
     "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
-    "https://stac-extensions.github.io/raster/v2.0.0/schema.json",
     "https://stac-extensions.github.io/file/v2.0.0/schema.json",
 ]
+# Observação: a raster extension v2.0.0 foi removida porque movemos
+# data_type/nodata/statistics para o campo `bands` do core STAC 1.1.0.
+# Declarar a extensão exige uso de ao menos um campo `raster:*`.
+
+# Mapeamento dos nomes do GDAL para o enum de data_type do STAC 1.1.0 core
+# (https://github.com/radiantearth/stac-spec/blob/master/commons/common-metadata.md#data_type).
+_GDAL_TO_STAC_DTYPE = {
+    "byte": "uint8",
+    "int8": "int8",
+    "uint16": "uint16",
+    "int16": "int16",
+    "uint32": "uint32",
+    "int32": "int32",
+    "uint64": "uint64",
+    "int64": "int64",
+    "float32": "float32",
+    "float64": "float64",
+    "cint16": "cint16",
+    "cint32": "cint32",
+    "cfloat32": "cfloat32",
+    "cfloat64": "cfloat64",
+}
 
 NOW_ISO = datetime.now(timezone.utc).isoformat()
 
@@ -66,7 +87,8 @@ def _extract_cog_metadata(cog_path: Path) -> dict[str, Any]:
 
     band = ds.GetRasterBand(1)
     nodata = band.GetNoDataValue()
-    dtype = gdal.GetDataTypeName(band.DataType).lower()
+    gdal_dtype = gdal.GetDataTypeName(band.DataType).lower()
+    dtype = _GDAL_TO_STAC_DTYPE.get(gdal_dtype, "other")
 
     # Statistics (min, max, mean, stddev)
     stats = band.GetStatistics(True, True)
@@ -127,24 +149,29 @@ def enrich_item(item_json_path: Path, cog_dir: Path, thumb_dir: Path) -> tuple[b
         # Update extensions
         item["stac_extensions"] = STAC_EXTENSIONS
 
-        # Update properties
+        # Update properties (projection v2.0.0 usa proj:code no lugar de proj:epsg)
         props = item.setdefault("properties", {})
-        props["proj:epsg"] = meta["epsg"]
+        props["proj:code"] = f"EPSG:{meta['epsg']}"
         props["proj:shape"] = meta["shape"]
         props["proj:transform"] = meta["transform"]
         props["created"] = NOW_ISO
         props["updated"] = NOW_ISO
+        # Remover campo legado caso exista de versões anteriores
+        props.pop("proj:epsg", None)
+        props.pop("raster:bands", None)
 
-        # Raster bands
-        raster_band: dict[str, Any] = {
+        # Band metadata — STAC 1.1.0 core usa asset.bands (raster v2.0.0
+        # removeu raster:bands); data_type/nodata/statistics migraram para
+        # Common Metadata sem prefixo.
+        band: dict[str, Any] = {
             "data_type": meta["dtype"],
             "nodata": meta["nodata"],
         }
         if meta["stats"]:
-            raster_band["statistics"] = meta["stats"]
-        props["raster:bands"] = [raster_band]
+            band["statistics"] = meta["stats"]
 
         # File extension on data asset
+        data_asset["bands"] = [band]
         data_asset["file:size"] = meta["file_size"]
         data_asset["proj:shape"] = meta["shape"]
         data_asset["proj:transform"] = meta["transform"]

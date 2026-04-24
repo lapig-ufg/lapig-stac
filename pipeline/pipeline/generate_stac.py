@@ -204,6 +204,22 @@ def _make_collection_dict(
         {"rel": "root", "href": "../catalog.json", "type": "application/json"},
     ]
 
+    # Stylesheets (SLD, QML) — rel IANA "stylesheet" é o padrão canônico
+    for sld_path in record.sld_urls:
+        links.append({
+            "rel": "stylesheet",
+            "type": "application/vnd.ogc.sld+xml",
+            "href": f"./styles/{Path(sld_path).name}",
+            "title": f"Estilo SLD — {record.title}",
+        })
+    for qml_path in record.qml_urls:
+        links.append({
+            "rel": "stylesheet",
+            "type": "application/x-qgis-style",
+            "href": f"./styles/{Path(qml_path).name}",
+            "title": f"Estilo QML — {record.title}",
+        })
+
     collection: dict[str, Any] = {
         "type": "Collection",
         "stac_version": STAC_VERSION,
@@ -223,27 +239,6 @@ def _make_collection_dict(
         "summaries": summaries,
         "links": links,
     }
-
-    # Style assets (SLD, QML)
-    assets: dict[str, Any] = {}
-    for i, sld_path in enumerate(record.sld_urls):
-        key = "style_sld" if i == 0 else f"style_sld_{i + 1}"
-        assets[key] = {
-            "href": f"./styles/{Path(sld_path).name}",
-            "type": "application/vnd.ogc.sld+xml",
-            "title": f"Estilo SLD — {record.title}",
-            "roles": ["style"],
-        }
-    for i, qml_path in enumerate(record.qml_urls):
-        key = "style_qml" if i == 0 else f"style_qml_{i + 1}"
-        assets[key] = {
-            "href": f"./styles/{Path(qml_path).name}",
-            "type": "application/x-qgis-style",
-            "title": f"Estilo QML — {record.title}",
-            "roles": ["style"],
-        }
-    if assets:
-        collection["assets"] = assets
 
     # Extra properties (layer_unit, class, etc.)
     extra: dict[str, Any] = {}
@@ -273,7 +268,7 @@ def _make_item_dict(
         "datetime": None,
         "start_datetime": _to_utc_isoformat(item_def.start_datetime),
         "end_datetime": _to_utc_isoformat(item_def.end_datetime),
-        "proj:epsg": 4326,
+        "proj:code": "EPSG:4326",
     }
     if gsd is not None:
         properties["gsd"] = gsd
