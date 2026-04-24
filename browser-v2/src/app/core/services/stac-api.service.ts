@@ -77,14 +77,24 @@ export class StacApiService {
 
     /**
      * Segue um link STAC (paginação, navegação).
-     * Resolve URLs relativas contra o baseUrl.
+     *
+     * Para POST, a spec STAC 1.0 (item-search) permite que o servidor retorne
+     * apenas um body parcial (ex.: `{ token }` ou `{ limit, skip }`) sinalizando
+     * `merge: true`. O cliente precisa, nesse caso, reenviar o body original
+     * mesclado com os campos do link. Como nem todos os servidores populam
+     * `merge: true` (o rustac atual emite apenas `{ limit, skip }`), aplicamos
+     * a mesclagem defensivamente sempre que `originalBody` é fornecido — é
+     * idempotente para servidores que já retornam o request completo.
      */
-    followLink<T>(link: StacLink): Observable<T> {
+    followLink<T>(link: StacLink, originalBody?: unknown): Observable<T> {
         const url = link.href.startsWith('http') ? link.href : `${this.baseUrl()}${link.href}`;
         if (link.method === 'POST') {
-            return this.http.post<T>(url, link.body, {
-                headers: link.headers
-            });
+            const linkBody = (link.body as Record<string, unknown> | undefined) ?? {};
+            const base = (originalBody as Record<string, unknown> | undefined) ?? {};
+            const body = { ...base, ...linkBody };
+            // `merge` é metadado da spec e não deve ser reenviado no próximo request.
+            delete (body as Record<string, unknown>)['merge'];
+            return this.http.post<T>(url, body, { headers: link.headers });
         }
         return this.http.get<T>(url, { headers: link.headers });
     }

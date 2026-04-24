@@ -16,7 +16,7 @@ import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { StacApiService } from '@/app/core/services/stac-api.service';
-import { StacCollection, StacItem, StacItemCollection, StacLink, SearchFilterState } from '@/app/core/models/stac.types';
+import { StacCollection, StacItem, StacItemCollection, StacLink, SearchFilterState, StacSearchRequest } from '@/app/core/models/stac.types';
 import { ItemCardComponent } from '@/app/shared/components/item-card/item-card.component';
 import { MapCanvasComponent } from '@/app/features/map/map-canvas.component';
 
@@ -270,6 +270,11 @@ export class SearchComponent {
     nextLink = signal<StacLink | null>(null);
     prevLink = signal<StacLink | null>(null);
 
+    // Body do POST /search original — reutilizado em páginas subsequentes
+    // para preservar filtros quando o servidor emite links rel=next/prev com
+    // apenas o delta de paginação ({limit, skip}/{token}).
+    private lastSearchRequest: StacSearchRequest | null = null;
+
     collectionOptions = signal<{ label: string; value: string }[]>([]);
 
     constructor() {
@@ -308,6 +313,7 @@ export class SearchComponent {
         this.filters.dateTo = this.dateTo ? this.dateTo.toISOString() : null;
 
         const request = this.stacApi.buildSearchRequest(this.filters);
+        this.lastSearchRequest = request;
         this.loading.set(true);
         this.searched.set(true);
         this.error.set(null);
@@ -336,7 +342,7 @@ export class SearchComponent {
 
     loadPage(link: StacLink) {
         this.loading.set(true);
-        this.stacApi.followLink<StacItemCollection>(link).pipe(
+        this.stacApi.followLink<StacItemCollection>(link, this.lastSearchRequest ?? undefined).pipe(
             takeUntilDestroyed(this.destroyRef)
         ).subscribe({
             next: (result: StacItemCollection) => this.processResults(result),

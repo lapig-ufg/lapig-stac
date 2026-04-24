@@ -173,6 +173,18 @@ import { MapCanvasComponent } from '@/app/features/map/map-canvas.component';
                                 [showFirstLastIcon]="false"
                             />
                         </div>
+                    } @else if (nextLink() || prevLink()) {
+                        <!-- Fallback: servidor não populou numberMatched.
+                             Navegação por links STAC rel=next/prev, como a spec
+                             permite. -->
+                        <div class="flex justify-center gap-3 mt-6">
+                            @if (prevLink()) {
+                                <p-button [label]="'pagination.prev' | translate" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (onClick)="loadPage(prevLink()!)" />
+                            }
+                            @if (nextLink()) {
+                                <p-button [label]="'pagination.next' | translate" icon="pi pi-arrow-right" iconPos="right" severity="secondary" [outlined]="true" (onClick)="loadPage(nextLink()!)" />
+                            }
+                        </div>
                     }
                 }
             </div>
