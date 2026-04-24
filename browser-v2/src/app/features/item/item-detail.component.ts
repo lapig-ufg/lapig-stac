@@ -1,7 +1,9 @@
 import { Component, inject, signal, computed, effect, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { parseSldToClassification } from '@/app/features/map/utils/sld-parser.utils';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -174,6 +176,10 @@ export class ItemDetailComponent {
     private stacApi = inject(StacApiService);
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
+    private http = inject(HttpClient);
+
+    /** Guard: evita que o SLD seja baixado/aplicado mais de uma vez por item. */
+    private sldAutoApplied = false;
 
     item = signal<StacItem | null>(null);
     loading = signal(true);
@@ -318,6 +324,36 @@ export class ItemDetailComponent {
                 }
             }
             this.cogStyleConfig.set(config);
+        });
+
+        // Auto-aplicação do estilo SLD:
+        //
+        // Mesmo com classification:classes na Collection (que o effect acima
+        // já aplicou), procuramos o primeiro `links[rel=stylesheet]` do Item
+        // com media type SLD e o baixamos para sobrescrever as classes com
+        // as do SLD. Isso garante que a cartografia oficial do serviço
+        // (OGC SLD) vire o default do mapa — sem o usuário clicar em
+        // "Aplicar ao mapa".
+        effect(() => {
+            const item = this.item();
+            const bands = this.cogBands();
+            if (!item || this.sldAutoApplied) return;
+            const sldLink = (item.links ?? []).find(
+                (l) => l.rel === 'stylesheet' && (l.type ?? '').includes('sld')
+            );
+            if (!sldLink?.href) return;
+
+            this.sldAutoApplied = true;
+            this.http.get(sldLink.href, { responseType: 'text' }).pipe(
+                takeUntilDestroyed(this.destroyRef)
+            ).subscribe({
+                next: (xml) => {
+                    const classes = parseSldToClassification(xml);
+                    if (!classes.length) return;
+                    this.cogStyleConfig.set(createDefaultCogStyle(bands.length, classes));
+                },
+                error: (err) => console.warn('[ItemDetail] falha ao baixar SLD:', err)
+            });
         });
     }
 
