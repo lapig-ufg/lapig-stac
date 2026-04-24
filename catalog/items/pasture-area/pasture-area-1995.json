@@ -1,0 +1,129 @@
+{
+  "type": "Feature",
+  "stac_version": "1.1.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.0.0/schema.json"
+  ],
+  "id": "pasture-area-1995",
+  "collection": "pasture-area",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -74.02099974839176,
+          -34.04066954489674
+        ],
+        [
+          -32.39217116700902,
+          -34.04066954489674
+        ],
+        [
+          -32.39217116700902,
+          5.435705784207225
+        ],
+        [
+          -74.02099974839176,
+          5.435705784207225
+        ],
+        [
+          -74.02099974839176,
+          -34.04066954489674
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -74.021,
+    -34.04067,
+    -32.392171,
+    5.435706
+  ],
+  "properties": {
+    "datetime": null,
+    "start_datetime": "1995-01-01T00:00:00+00:00",
+    "end_datetime": "1995-12-31T23:59:59+00:00",
+    "gsd": 30.0,
+    "proj:shape": [
+      146483,
+      154470
+    ],
+    "proj:transform": [
+      0.0002694945852358564,
+      0.0,
+      -74.02099974839176,
+      0.0,
+      -0.0002694945852358564,
+      5.435705784207225
+    ],
+    "created": "2026-04-06T23:27:02.422844+00:00",
+    "updated": "2026-04-06T23:27:02.422844+00:00",
+    "proj:code": "EPSG:4326"
+  },
+  "assets": {
+    "data": {
+      "href": "https://s3.lapig.iesa.ufg.br/stac/col10/pasture-area/cogs/mapbiomas_pasture_1995.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "roles": [
+        "data"
+      ],
+      "file:size": 329128996,
+      "proj:shape": [
+        146483,
+        154470
+      ],
+      "proj:transform": [
+        0.0002694945852358564,
+        0.0,
+        -74.02099974839176,
+        0.0,
+        -0.0002694945852358564,
+        5.435705784207225
+      ],
+      "file:checksum": "1220b4e4244b12ba6dc5d06f0e3e39abe85b98f0b00020745ee225861f7ba94a0345",
+      "bands": [
+        {
+          "data_type": "uint8",
+          "nodata": 0.0,
+          "statistics": {
+            "minimum": 1.0,
+            "maximum": 1.0,
+            "mean": 1.0,
+            "stddev": 0.0
+          }
+        }
+      ]
+    },
+    "thumbnail": {
+      "href": "https://s3.lapig.iesa.ufg.br/stac/col10/pasture-area/thumbnails/pasture-area-1995.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "file:size": 17663
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-area/items/pasture-area-1995",
+      "type": "application/geo+json"
+    },
+    {
+      "rel": "collection",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-area",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-area",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "https://stac.lapig.iesa.ufg.br/api/",
+      "type": "application/json"
+    }
+  ]
+}

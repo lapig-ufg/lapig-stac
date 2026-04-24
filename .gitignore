@@ -18,8 +18,6 @@ dist/
 data/
 catalog/cogs/
 catalog/thumbnails/
-catalog/items/
-catalog/collections/
 catalog/items.parquet
 catalog/items_rustac.parquet
 catalog/stac_all.ndjson
@@ -29,10 +27,13 @@ catalog/collections.ndjson
 catalog/items.ndjson
 catalog/lapig-catalog.json
 
-# Exceções: arquivos pequenos do catálogo necessários ao build Docker.
-# Os JSONs `pasture-*.json` eram os "clean files" consumidos pelo antigo
-# rustac e podem ser removidos num próximo passo; os estilos permanecem
-# pois o nginx os serve como arquivos estáticos.
+# Os JSONs do catálogo (catalog/collections/*.json e catalog/items/**/*.json)
+# SÃO versionados: são a fonte de verdade consumida pelo `lapig-stac
+# export-ndjson` no build Docker, que gera os ndjson carregados no pgstac
+# pelo entrypoint em runtime. São pequenos (~260 KB total).
+#
+# Os JSONs `pasture-*.json` na raiz eram clean files do antigo rustac e
+# podem ser removidos num próximo passo; por ora continuam whitelisted.
 !catalog/pasture-area.json
 !catalog/pasture-vigor.json
 !catalog/styles/

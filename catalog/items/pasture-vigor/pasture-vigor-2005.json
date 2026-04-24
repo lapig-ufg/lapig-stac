@@ -1,0 +1,129 @@
+{
+  "type": "Feature",
+  "stac_version": "1.1.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/projection/v2.0.0/schema.json",
+    "https://stac-extensions.github.io/file/v2.0.0/schema.json"
+  ],
+  "id": "pasture-vigor-2005",
+  "collection": "pasture-vigor",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -74.02099974839176,
+          -34.049023877039055
+        ],
+        [
+          -32.39217116700903,
+          -34.049023877039055
+        ],
+        [
+          -32.39217116700903,
+          5.43274134376963
+        ],
+        [
+          -74.02099974839176,
+          5.43274134376963
+        ],
+        [
+          -74.02099974839176,
+          -34.049023877039055
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -74.021,
+    -34.049024,
+    -32.392171,
+    5.432741
+  ],
+  "properties": {
+    "datetime": null,
+    "start_datetime": "2005-01-01T00:00:00+00:00",
+    "end_datetime": "2005-12-31T23:59:59+00:00",
+    "gsd": 30.0,
+    "proj:shape": [
+      146503,
+      154470
+    ],
+    "proj:transform": [
+      0.0002694945852358563,
+      0.0,
+      -74.02099974839176,
+      0.0,
+      -0.00026949458523585647,
+      5.43274134376963
+    ],
+    "created": "2026-04-06T23:27:02.422844+00:00",
+    "updated": "2026-04-06T23:27:02.422844+00:00",
+    "proj:code": "EPSG:4326"
+  },
+  "assets": {
+    "data": {
+      "href": "https://s3.lapig.iesa.ufg.br/stac/col10/pasture-vigor/cogs/mapbiomas_pasture_vigor_2005.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "roles": [
+        "data"
+      ],
+      "file:size": 425956135,
+      "proj:shape": [
+        146503,
+        154470
+      ],
+      "proj:transform": [
+        0.0002694945852358563,
+        0.0,
+        -74.02099974839176,
+        0.0,
+        -0.00026949458523585647,
+        5.43274134376963
+      ],
+      "file:checksum": "12202bf44defc83995775d703ab7a9ef1ce8c3b76c0e1f539ab046c9c146531fb1f9",
+      "bands": [
+        {
+          "data_type": "uint8",
+          "nodata": 0.0,
+          "statistics": {
+            "minimum": 1.0,
+            "maximum": 3.0,
+            "mean": 2.018935,
+            "stddev": 0.759708
+          }
+        }
+      ]
+    },
+    "thumbnail": {
+      "href": "https://s3.lapig.iesa.ufg.br/stac/col10/pasture-vigor/thumbnails/pasture-vigor-2005.png",
+      "type": "image/png",
+      "roles": [
+        "thumbnail"
+      ],
+      "file:size": 24002
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor/items/pasture-vigor-2005",
+      "type": "application/geo+json"
+    },
+    {
+      "rel": "collection",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor",
+      "type": "application/json"
+    },
+    {
+      "rel": "parent",
+      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor",
+      "type": "application/json"
+    },
+    {
+      "rel": "root",
+      "href": "https://stac.lapig.iesa.ufg.br/api/",
+      "type": "application/json"
+    }
+  ]
+}
