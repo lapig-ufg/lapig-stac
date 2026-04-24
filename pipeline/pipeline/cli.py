@@ -32,8 +32,8 @@ def main() -> None:
 )
 @click.option(
     "--base-url",
-    default="https://minio.lapig.ufg.br/lapig-cogs",
-    help="Base URL for COG asset hrefs.",
+    default="https://s3.lapig.iesa.ufg.br/stac/col10",
+    help="Base URL pública (S3) para os assets de dados (COGs, thumbnails).",
 )
 def generate(data_dir: str, output: str, base_url: str) -> None:
     """Scan local data directories and generate STAC Collections + Items."""
@@ -214,8 +214,8 @@ def convert(data_dir: str, output: str, cog_workers: int, thumb_workers: int) ->
 )
 @click.option(
     "--base-url",
-    default="https://minio.lapig.ufg.br/lapig-cogs",
-    help="Base URL for COG asset hrefs.",
+    default="https://s3.lapig.iesa.ufg.br/stac/col10",
+    help="Base URL pública (S3) para os assets de dados (COGs, thumbnails).",
 )
 def run_all(data_dir: str, output: str, base_url: str) -> None:
     """Run the full pipeline: scan → generate → validate → build-parquet."""

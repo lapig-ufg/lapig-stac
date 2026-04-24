@@ -10,7 +10,7 @@ from pipeline.build_geoparquet import build_geoparquet
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 OUTPUT_DIR = Path(__file__).parent.parent / "catalog"
-BASE_URL = "https://minio.lapig.ufg.br/lapig-cogs"
+BASE_URL = "https://s3.lapig.iesa.ufg.br/stac/col10"
 
 print(f"Data dir: {DATA_DIR}")
 print(f"Output:   {OUTPUT_DIR}")

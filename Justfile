@@ -32,15 +32,18 @@ build-parquet:
     rustac translate /tmp/stac_items.ndjson {{ catalog }}/items_rustac.parquet -i ndjson -o parquet
 
 # Gerar JSONs de collection limpos para rustac serve
+# Remove links navegacionais (self/root/parent/items/item/child/collection)
+# para que o rustac regenere dinamicamente sob o domínio oficial; preserva
+# apenas os stylesheets, que precisam ser referenciados no clean file.
 build-collections:
-    cd pipeline && python3 -c " \
+    cd pipeline && uv run python -c " \
     import json; \
-    [json.dump({k:v for k,v in json.load(open(f'{{ catalog }}/collections/{c}.json')).items() \
-     if k != 'links' or True}, open(f'{{ catalog }}/{c}.json','w'), ensure_ascii=False) \
-     or [d:=json.load(open(f'{{ catalog }}/collections/{c}.json')), \
-         d.__setitem__('links', []), \
-         json.dump(d, open(f'{{ catalog }}/{c}.json','w'), ensure_ascii=False)] \
-     for c in ['pasture-area', 'pasture-vigor']]"
+    NAV = {'self', 'root', 'parent', 'items', 'item', 'child', 'collection'}; \
+    [( \
+        d := json.load(open(f'../{{ catalog }}/collections/{c}.json', encoding='utf-8')), \
+        d.__setitem__('links', [l for l in d.get('links', []) if l.get('rel') not in NAV]), \
+        json.dump(d, open(f'../{{ catalog }}/{c}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2) \
+    ) for c in ('pasture-area', 'pasture-vigor')]"
 
 # Validar items STAC (checagem estrutural do pipeline)
 validate:

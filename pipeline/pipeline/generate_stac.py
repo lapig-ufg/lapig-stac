@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -38,6 +39,19 @@ GLOBAL_GEOMETRY = mapping(Polygon([
     (-180, -90), (180, -90), (180, 90), (-180, 90), (-180, -90)
 ]))
 
+# URLs públicas oficiais. Nenhum caminho relativo (./…) ou host de
+# desenvolvimento (127.0.0.1/localhost) deve aparecer nos JSONs gerados.
+# API_BASE_URL é o host do STAC API em produção; S3_BASE_URL é o bucket
+# público onde ficam COGs, thumbnails e demais assets binários. Ambos
+# podem ser sobrescritos por variáveis de ambiente para ambientes
+# alternativos (staging, homologação).
+API_BASE_URL = os.environ.get(
+    "STAC_API_BASE_URL", "https://stac.lapig.iesa.ufg.br/api"
+).rstrip("/")
+S3_BASE_URL = os.environ.get(
+    "STAC_S3_BASE_URL", "https://s3.lapig.iesa.ufg.br/stac/col10"
+).rstrip("/")
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -69,7 +83,7 @@ def _write_json(path: Path, data: Any) -> None:
 
 def scan_result_to_parse_result(
     scan: ScanResult,
-    base_url: str = "https://minio.lapig.ufg.br/lapig-cogs",
+    base_url: str = S3_BASE_URL,
 ) -> ParseResult:
     """Convert a ScanResult (from local_scanner) to a ParseResult for the generator."""
     catalog = CatalogInfo(
@@ -199,24 +213,27 @@ def _make_collection_dict(
     if record.gsd is not None:
         summaries["gsd"] = [record.gsd]
 
+    collection_url = f"{API_BASE_URL}/collections/{record.id}"
     links: list[dict[str, str]] = [
-        {"rel": "self", "href": f"./collections/{record.id}.json", "type": "application/json"},
-        {"rel": "root", "href": "../catalog.json", "type": "application/json"},
+        {"rel": "self", "href": collection_url, "type": "application/json"},
+        {"rel": "root", "href": f"{API_BASE_URL}/", "type": "application/json"},
+        {"rel": "parent", "href": f"{API_BASE_URL}/", "type": "application/json"},
+        {"rel": "items", "href": f"{collection_url}/items", "type": "application/geo+json"},
     ]
 
-    # Stylesheets (SLD, QML) — rel IANA "stylesheet" é o padrão canônico
+    # Stylesheets (SLD, QML) — servidos sob o domínio oficial da API
     for sld_path in record.sld_urls:
         links.append({
             "rel": "stylesheet",
             "type": "application/vnd.ogc.sld+xml",
-            "href": f"./styles/{Path(sld_path).name}",
+            "href": f"{collection_url}/styles/{Path(sld_path).name}",
             "title": f"Estilo SLD — {record.title}",
         })
     for qml_path in record.qml_urls:
         links.append({
             "rel": "stylesheet",
             "type": "application/x-qgis-style",
-            "href": f"./styles/{Path(qml_path).name}",
+            "href": f"{collection_url}/styles/{Path(qml_path).name}",
             "title": f"Estilo QML — {record.title}",
         })
 
@@ -288,6 +305,7 @@ def _make_item_dict(
                 "roles": ["data"],
             }
 
+    collection_url = f"{API_BASE_URL}/collections/{collection_id}"
     return {
         "type": "Feature",
         "stac_version": STAC_VERSION,
@@ -301,8 +319,10 @@ def _make_item_dict(
         "properties": properties,
         "assets": assets,
         "links": [
-            {"rel": "collection", "href": f"../../collections/{collection_id}.json", "type": "application/json"},
-            {"rel": "root", "href": "../../catalog.json", "type": "application/json"},
+            {"rel": "self", "href": f"{collection_url}/items/{item_def.item_id}", "type": "application/geo+json"},
+            {"rel": "root", "href": f"{API_BASE_URL}/", "type": "application/json"},
+            {"rel": "parent", "href": collection_url, "type": "application/json"},
+            {"rel": "collection", "href": collection_url, "type": "application/json"},
         ],
     }
 
@@ -337,15 +357,18 @@ def generate_catalog(
         "title": parse_result.catalog.title,
         "description": parse_result.catalog.description,
         "links": [
-            {"rel": "self", "href": "./catalog.json", "type": "application/json"},
-            {"rel": "root", "href": "./catalog.json", "type": "application/json"},
+            {"rel": "self", "href": f"{API_BASE_URL}/", "type": "application/json"},
+            {"rel": "root", "href": f"{API_BASE_URL}/", "type": "application/json"},
+            {"rel": "data", "href": f"{API_BASE_URL}/collections", "type": "application/json"},
+            {"rel": "search", "href": f"{API_BASE_URL}/search", "type": "application/geo+json", "method": "GET"},
+            {"rel": "search", "href": f"{API_BASE_URL}/search", "type": "application/geo+json", "method": "POST"},
         ],
     }
 
     for rec in parse_result.collections:
         catalog_dict["links"].append({
             "rel": "child",
-            "href": f"./collections/{rec.id}.json",
+            "href": f"{API_BASE_URL}/collections/{rec.id}",
             "type": "application/json",
             "title": rec.title,
         })
@@ -386,12 +409,12 @@ def generate_catalog(
         bbox = rec.custom_bbox or GLOBAL_BBOX
         geom = _bbox_to_geometry(bbox)
 
-        # Add item links
+        # Add item links (URLs absolutas da API oficial)
         for item_def in rec.items:
             col_dict["links"].append({
                 "rel": "item",
-                "href": f"../items/{rec.id}/{item_def.item_id}.json",
-                "type": "application/json",
+                "href": f"{API_BASE_URL}/collections/{rec.id}/items/{item_def.item_id}",
+                "type": "application/geo+json",
             })
 
         _write_json(collections_dir / f"{rec.id}.json", col_dict)
