@@ -1,20 +1,30 @@
 # =============================================================================
-# LAPIG STAC API — rustac serve via pip (Python wheel com binário Rust)
+# LAPIG STAC API — stac-fastapi-pgstac (desenvolvimento / docker-compose)
 # =============================================================================
 FROM python:3.12-slim
 
-RUN pip install --no-cache-dir rustac==0.9.8
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y curl postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Catálogo: collections JSON + items parquet (montados via volume ou COPY)
-COPY catalog/pasture-area.json catalog/pasture-vigor.json /app/catalog/
-COPY catalog/items_rustac.parquet /app/catalog/
+# Dependências da API e do carregador pgstac. Versões fixadas no pyproject
+# do pipeline; aqui replicamos por clareza de runtime.
+RUN pip install --no-cache-dir --root-user-action=ignore \
+        'stac-fastapi.pgstac==6.2.2' \
+        'pypgstac[psycopg]==0.9.6' \
+        'uvicorn[standard]==0.32.*'
+
+# Pipeline (usado para export-ndjson quando o catálogo muda em dev)
+COPY pipeline/pyproject.toml pipeline/README.md* /app/pipeline/
+COPY pipeline/pipeline /app/pipeline/pipeline
+RUN pip install --no-cache-dir --root-user-action=ignore /app/pipeline
+
+# Entrypoint dev: aguarda Postgres → pypgstac migrate → load → uvicorn.
+COPY docker/dev/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 7822
 
-CMD ["rustac", "serve", \
-     "/app/catalog/pasture-area.json", \
-     "/app/catalog/pasture-vigor.json", \
-     "/app/catalog/items_rustac.parquet", \
-     "--addr", "0.0.0.0:7822"]
+ENTRYPOINT ["/entrypoint.sh"]

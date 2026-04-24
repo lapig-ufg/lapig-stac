@@ -1,6 +1,6 @@
 # =============================================================================
 # LAPIG STAC — Imagem unificada de produção
-# Multi-stage: Angular build (Node) + Python/rustac + nginx
+# Multi-stage: Angular build (Node) + Python/FastAPI + nginx
 # =============================================================================
 
 # Stage 1: Build Angular
@@ -14,23 +14,37 @@ RUN npm ci --ignore-scripts
 COPY browser-v2/ .
 RUN npx ng build --configuration=production
 
-# Stage 2: Imagem final — Python + nginx + rustac + SPA
+# Stage 2: Export do catálogo em ndjson (entrada para pypgstac load no boot)
+FROM python:3.12-slim AS catalog-ndjson
+
+WORKDIR /pipeline
+COPY pipeline/pyproject.toml pipeline/README.md* /pipeline/
+COPY pipeline/pipeline /pipeline/pipeline
+RUN pip install --no-cache-dir --root-user-action=ignore .
+
+COPY catalog /catalog
+RUN lapig-stac export-ndjson -d /catalog
+
+# Stage 3: Imagem final — Python + FastAPI (stac-fastapi-pgstac) + nginx + SPA
 FROM python:3.12-slim
 
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y nginx curl && \
+    apt-get install --no-install-recommends -y nginx curl postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
-# rustac (módulo Python com extensão Rust .abi3.so)
-RUN pip install --no-cache-dir rustac==0.9.8
+# Dependências da API STAC
+RUN pip install --no-cache-dir --root-user-action=ignore \
+        'stac-fastapi.pgstac==6.2.2' \
+        'pypgstac[psycopg]==0.9.6' \
+        'uvicorn[standard]==0.32.*'
 
 # SPA Angular
 COPY --from=browser-build /app/dist/apollo-ng/browser/ /usr/share/nginx/html/
 
-# Catálogo STAC (collections JSON + items parquet + estilos)
-COPY catalog/pasture-area.json catalog/pasture-vigor.json /app/catalog/
-COPY catalog/items_rustac.parquet /app/catalog/
+# Catálogo — apenas estilos (servidos pelo nginx) e ndjson (ingestão no boot)
 COPY catalog/styles/ /app/catalog/styles/
+COPY --from=catalog-ndjson /catalog/collections.ndjson /app/catalog/collections.ndjson
+COPY --from=catalog-ndjson /catalog/items.ndjson /app/catalog/items.ndjson
 
 # version.json (gerado pelo CI)
 COPY version.json /app/version.json
