@@ -1,12 +1,50 @@
 services:
+  db:
+    image: postgis/postgis:17-3.4
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-stac_lapig}
+    # A porta 5432 do host costuma estar ocupada por outras instalações;
+    # expõe-se em 5433 para acesso com psql/DBeaver fora do compose.
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-stac_lapig}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   stac-api:
     build: .
     ports:
       - "7822:7822"
+    environment:
+      # DATABASE_URL é usada por pg_isready, pypgstac migrate/load e pelo
+      # próprio FastAPI (o entrypoint deriva PGUSER/PGHOST/... a partir dela
+      # quando não fornecidas). Em produção, o orquestrador injeta a
+      # credencial completa apontando para o Postgres institucional.
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/stac_lapig}
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGHOST: ${PGHOST:-db}
+      PGPORT: ${PGPORT:-5432}
+      PGDATABASE: ${POSTGRES_DB:-stac_lapig}
+      CATALOG_DIR: /catalog
+      # Em dev, acessamos a API via nginx em http://localhost:3000/api/,
+      # então o FastAPI deve emitir os hrefs já com o prefixo /api. A rota
+      # direta http://localhost:7822/* continua funcionando (o routing
+      # não muda), apenas os links nas respostas passam a vir prefixados.
+      STAC_ROOT_PATH: /api
     volumes:
-      - ./catalog/pasture-area.json:/app/catalog/pasture-area.json:ro
-      - ./catalog/pasture-vigor.json:/app/catalog/pasture-vigor.json:ro
-      - ./catalog/items_rustac.parquet:/app/catalog/items_rustac.parquet:ro
+      # Catálogo montado read-only; o entrypoint gera ndjson aqui se faltarem
+      # e chama pypgstac load no boot.
+      - ./catalog:/catalog:rw
+    depends_on:
+      db:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7822/"]
       interval: 10s
@@ -32,3 +70,6 @@ services:
     depends_on:
       - stac-api
       - browser
+
+volumes:
+  pgdata:
