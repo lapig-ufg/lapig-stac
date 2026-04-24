@@ -9,7 +9,7 @@
 
 Catálogo de dados geoespaciais do **LAPIG/UFG** compatível com [STAC v1.1.0](https://stacspec.org/).
 
-Disponibiliza coleções de pastagem (área e vigor) do MapBiomas como itens STAC com COGs otimizados, servidos dinamicamente via [rustac](https://github.com/stac-utils/rustac).
+Disponibiliza coleções de pastagem (área e vigor) do MapBiomas como itens STAC com COGs otimizados, servidos dinamicamente via [stac-fastapi-pgstac](https://github.com/stac-utils/stac-fastapi-pgstac) (FastAPI + PostgreSQL/pgstac).
 
 <p align="center">
   <img src="docs/assets/lapig-stac-demo.gif" alt="Demo LAPIG STAC Browser" width="720" />
@@ -29,7 +29,7 @@ Disponibiliza coleções de pastagem (área e vigor) do MapBiomas como itens STA
 
 | Componente | Tecnologia | Funcao |
 |---|---|---|
-| **API STAC** | [rustac](https://github.com/stac-utils/rustac) v0.9.8 + DuckDB | Servidor STAC dinamico a partir de GeoParquet |
+| **API STAC** | [stac-fastapi-pgstac](https://github.com/stac-utils/stac-fastapi-pgstac) v5 + PostgreSQL/PostGIS + [pgstac](https://github.com/stac-utils/pgstac) v0.9 | Servidor STAC dinâmico com filter (CQL2), sort, fields e transactions prontos |
 | **Browser** | Angular 21 + PrimeNG 21 + OpenLayers 10.7 | Visualizacao interativa com renderizacao WebGL de COGs |
 | **Proxy** | Nginx 1.29 | Roteamento, CORS para COGs no S3, estilos estaticos (SLD/QML) |
 | **Pipeline** | Python 3.11 + GDAL + Click | Geracao de catalogo STAC, conversao COG, enriquecimento de metadados |
@@ -47,39 +47,35 @@ Disponibiliza coleções de pastagem (área e vigor) do MapBiomas como itens STA
 
 ```bash
 cd pipeline
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-pip install rustac
+uv sync
 ```
 
 ### 2. Pipeline completo
 
 ```bash
 # Gerar metadados STAC a partir dos dados locais
-lapig-stac all -d ../data -o ../catalog
+uv run lapig-stac all -d ../data -o ../catalog
 
 # Converter TIFFs para COG otimizados + thumbnails
-lapig-stac convert -d ../data -o ../catalog --cog-workers 4
+uv run lapig-stac convert -d ../data -o ../catalog --cog-workers 4
 
 # Enriquecer itens com metadados reais dos COGs
-lapig-stac enrich -d ../catalog
+uv run lapig-stac enrich -d ../catalog
 
-# Gerar parquet no formato stac-geoparquet (rustac)
-rustac translate /tmp/stac_items.ndjson catalog/items_rustac.parquet
+# Emitir ndjson para carga no pgstac (usado pelo build Docker e pelo
+# entrypoint em runtime)
+uv run lapig-stac export-ndjson -d ../catalog
 ```
 
-### 3. Servir localmente
+### 3. Servir localmente (Docker Compose)
 
 ```bash
-rustac serve \
-    catalog/pasture-area.json \
-    catalog/pasture-vigor.json \
-    catalog/items_rustac.parquet \
-    --addr 0.0.0.0:7822
+just serve   # sobe Postgres + API + SPA + nginx
 ```
 
-### 4. Docker Compose (desenvolvimento local)
+O `stac-fastapi-pgstac` aplica migrações `pgstac` e carrega o catálogo em cada boot (idempotente via `upsert`).
+
+### 4. Docker Compose (desenvolvimento completo)
 
 ```bash
 docker compose up -d --build

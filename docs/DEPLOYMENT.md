@@ -61,7 +61,8 @@ A aplicação está publicada em **https://stac.lapig.iesa.ufg.br** com a seguin
 | Reverse proxy | Traefik v3.6.7 com TLS automático (Let's Encrypt) |
 | DNS | BIND9 (zona `lapig.iesa.ufg.br`) |
 | CI/CD | GitHub Actions → DockerHub → zelador (deploy automático) |
-| Imagem | `lapig/lapig-stac:prod_latest` (Python 3.12 + nginx + rustac + Angular SPA) |
+| Imagem | `lapig/lapig-stac:prod_latest` (Python 3.12 + nginx + stac-fastapi-pgstac + Angular SPA) |
+| Banco de dados | PostgreSQL + PostGIS institucional (database dedicado `stac_lapig`) |
 
 ### Pipeline CI/CD
 
@@ -86,7 +87,21 @@ push main → GitHub Actions → DockerHub → zelador → Docker Swarm → Trae
 
 | Variável | Descrição |
 |---|---|
+| `DATABASE_URL` | String de conexão Postgres apontando para o database dedicado `stac_lapig`. Injetada pelo `zelador`/Docker Swarm. O entrypoint roda `pypgstac migrate` (idempotente) e `pypgstac load … --method upsert` a cada boot, garantindo sincronia do catálogo. |
 | `MAPBOX_TOKEN` | Token do Mapbox para basemap do browser (injetado em runtime) |
+
+### Banco de dados
+
+O serviço usa `stac-fastapi-pgstac` (FastAPI + PostgreSQL com extensão pgstac). O banco é o Postgres institucional compartilhado, em um database dedicado (`stac_lapig`) criado uma única vez antes do primeiro deploy:
+
+```sql
+CREATE DATABASE stac_lapig;
+-- dentro do database:
+CREATE EXTENSION IF NOT EXISTS postgis;
+-- o schema `pgstac` é criado automaticamente pelo `pypgstac migrate` no boot.
+```
+
+As credenciais completas (usuário, senha, host, porta) são agrupadas em `DATABASE_URL`. Não há serviço Postgres declarado no stack Compose do projeto — o banco vive fora do ciclo de vida do container.
 
 ### Verificação
 
@@ -106,12 +121,15 @@ curl -f https://stac.lapig.iesa.ufg.br/api/
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `STAC_HOST` | `0.0.0.0` | Endereço de bind da API |
-| `STAC_PORT` | `8000` | Porta da API |
-| `CATALOG_PARQUET_PATH` | `/app/catalog/items.parquet` | Caminho do arquivo Parquet |
-| `COLLECTIONS_JSON_PATH` | `/app/catalog/collections.json` | Caminho do JSON de coleções |
+| `STAC_PORT` | `7822` | Porta da API |
+| `CATALOG_DIR` | `/catalog` | Diretório do catálogo dentro do container (montado em volume) |
+| `POSTGRES_USER` | `postgres` | Usuário do Postgres local (serviço `db` do compose) |
+| `POSTGRES_PASSWORD` | `postgres` | Senha do Postgres local |
+| `POSTGRES_DB` | `stac_lapig` | Database local |
+| `POSTGRES_HOST_PORT` | `5433` | Porta mapeada no host (5432 interna) |
+| `DATABASE_URL` | `postgresql://postgres:postgres@db:5432/stac_lapig` | String de conexão usada pela API e pelo loader |
 | `CATALOG_TITLE` | `LAPIG Data Catalog` | Título do catálogo |
-| `PUBLIC_URL` | `http://localhost` | URL pública da API |
-| `RUST_LOG` | `info` | Nível de log (trace, debug, info, warn, error) |
+| `PUBLIC_URL` | `http://localhost:7822` | URL pública da API em dev |
 
 ### Health Check
 

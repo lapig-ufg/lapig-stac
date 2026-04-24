@@ -71,13 +71,28 @@ full: generate convert enrich build-parquet build-collections
 
 # ---------- Serve (local) -----------------------------------------------------
 
-# Iniciar API STAC localmente (rustac serve)
+# Subir stack de desenvolvimento: Postgres + stac-fastapi-pgstac + SPA + nginx.
 serve:
-    cd pipeline && rustac serve \
-        ../{{ catalog }}/pasture-area.json \
-        ../{{ catalog }}/pasture-vigor.json \
-        ../{{ catalog }}/items_rustac.parquet \
-        --addr 0.0.0.0:7822
+    docker compose up -d --build db stac-api
+
+# Parar e remover apenas a stack de desenvolvimento.
+stop:
+    docker compose down
+
+# Zerar o banco local (volume nomeado pgdata). O próximo `just serve`
+# aplicará migrações e recarregará o catálogo do zero.
+db-reset:
+    docker compose down -v
+    docker volume rm -f lapig-stac_pgdata 2>/dev/null || true
+
+# Exportar o catálogo como ndjson (artefato consumido pelo `pypgstac load`).
+export-ndjson:
+    cd pipeline && uv run lapig-stac export-ndjson -d ../{{ catalog }}
+
+# Carregar o catálogo em uma instância pgstac apontada por DATABASE_URL.
+# Útil em dev quando se quer recarregar sem reiniciar o container.
+load-pgstac:
+    cd pipeline && uv run --extra pgstac lapig-stac load-pgstac -d ../{{ catalog }}
 
 # ---------- Docker Compose ----------------------------------------------------
 
