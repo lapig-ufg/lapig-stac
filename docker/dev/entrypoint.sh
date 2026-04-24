@@ -62,7 +62,11 @@ pypgstac load items "$CATALOG_DIR/items.ndjson" --dsn "$DATABASE_URL" --method u
 
 # Configuração de root_path é opcional em dev — o nginx local usa /api/
 # também, mas o acesso direto em http://localhost:7822 é sem prefixo.
-exec uvicorn stac_fastapi.pgstac.app:app \
+# STAC_CATALOG_LANDING aponta para o catalog.json no volume montado em dev
+# (em prod, o arquivo é COPY no Dockerfile e fica em /app/catalog/).
+export STAC_CATALOG_LANDING="${STAC_CATALOG_LANDING:-${CATALOG_DIR:-/catalog}/catalog.json}"
+cd /app
+exec uvicorn stac_api_app:app \
     --host 0.0.0.0 --port 7822 \
     --root-path "${STAC_ROOT_PATH:-}" \
     --proxy-headers --forwarded-allow-ips='*'

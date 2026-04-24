@@ -71,7 +71,8 @@ pypgstac load items /app/catalog/items.ndjson --dsn "$DATABASE_URL" --method ups
 export POSTGRES_READ_URL="$DATABASE_URL"
 export POSTGRES_WRITE_URL="$DATABASE_URL"
 
-uvicorn stac_fastapi.pgstac.app:app \
+cd /app
+uvicorn stac_api_app:app \
     --host 127.0.0.1 --port 7822 \
     --root-path /api \
     --proxy-headers --forwarded-allow-ips='*' \
