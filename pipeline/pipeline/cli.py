@@ -218,9 +218,9 @@ def convert(data_dir: str, output: str, cog_workers: int, thumb_workers: int) ->
     help="Base URL pública (S3) para os assets de dados (COGs, thumbnails).",
 )
 def run_all(data_dir: str, output: str, base_url: str) -> None:
-    """Run the full pipeline: scan → generate → validate → build-parquet."""
-    from pipeline.build_geoparquet import build_geoparquet
+    """Run the full pipeline: scan → generate → validate → export-ndjson."""
     from pipeline.generate_stac import generate_catalog, scan_result_to_parse_result
+    from pipeline.load_pgstac import export_ndjson
     from pipeline.local_scanner import scan_local_data
     from pipeline.validate_catalog import validate_catalog
 
@@ -244,11 +244,11 @@ def run_all(data_dir: str, output: str, base_url: str) -> None:
     if errors > 0:
         raise SystemExit(1)
 
-    # 3. Build GeoParquet
-    click.echo("[3/3] Building GeoParquet...")
-    build_geoparquet(output_path)
+    # 3. Export ndjson (artefato de ingestão para pgstac)
+    click.echo("[3/3] Exportando collections.ndjson + items.ndjson...")
+    export_ndjson(output_path)
 
-    click.echo("Pipeline complete.")
+    click.echo("Pipeline completo. Execute `lapig-stac load-pgstac` para carregar no banco.")
 
 
 # ---------------------------------------------------------------------------
