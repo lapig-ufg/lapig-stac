@@ -104,10 +104,10 @@ import { createDefaultCogStyle } from '@/app/features/map/models/cog-style.types
                             />
                         </div>
 
-                        @if (collectionAssets()) {
+                        @if (itemStylesheets()) {
                             <div class="mt-4 pt-4" style="border-top: 1px solid var(--surface-border);">
                                 <app-style-list
-                                    [styles]="collectionAssets()!"
+                                    [styles]="itemStylesheets()!"
                                     [baseUrl]="collectionBaseUrl()"
                                     (applyStyle)="onApplyStyle($event)"
                                 />
@@ -181,6 +181,30 @@ export class ItemDetailComponent {
     collection = signal<StacCollection | null>(null);
 
     collectionAssets = computed(() => this.collection()?.assets ?? null);
+
+    /**
+     * Após o redesenho, os estilos (SLD/QML) são expostos como
+     * `links[rel=stylesheet]` nos próprios Items (não mais em
+     * `collection.assets`). Para reaproveitar o `<app-style-list>` sem
+     * alterar sua interface, projetamos os links em um Record no formato
+     * StacAsset com `roles: ['style']`.
+     */
+    itemStylesheets = computed<Record<string, StacAsset> | null>(() => {
+        const item = this.item();
+        if (!item) return null;
+        const entries: Record<string, StacAsset> = {};
+        for (const link of item.links ?? []) {
+            if (link.rel !== 'stylesheet' || !link.href) continue;
+            const key = decodeURIComponent(link.href.split('/').pop() || link.href);
+            entries[key] = {
+                href: link.href,
+                type: link.type,
+                title: link.title,
+                roles: ['style']
+            };
+        }
+        return Object.keys(entries).length > 0 ? entries : null;
+    });
 
     collectionId: string;
     itemId: string;
