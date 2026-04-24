@@ -1,5 +1,5 @@
 # =============================================================================
-# LAPIG STAC — Justfile (rustac + pipeline Python)
+# LAPIG STAC — Justfile (pipeline Python + stac-fastapi-pgstac)
 # =============================================================================
 
 set dotenv-load
@@ -9,45 +9,21 @@ catalog := "catalog"
 
 # ---------- Pipeline ----------------------------------------------------------
 
-# Pipeline completo: scan → STAC JSON → validação → GeoParquet
+# Pipeline completo: scan → STAC JSON → validação → ndjson (pronto p/ pypgstac load)
 generate:
-    cd pipeline && lapig-stac all -d ../{{ data_dir }} -o ../{{ catalog }}
+    cd pipeline && uv run lapig-stac all -d ../{{ data_dir }} -o ../{{ catalog }}
 
 # Converter TIFFs para COG + gerar thumbnails
 convert:
-    cd pipeline && lapig-stac convert -d ../{{ data_dir }} -o ../{{ catalog }} --cog-workers 4
+    cd pipeline && uv run lapig-stac convert -d ../{{ data_dir }} -o ../{{ catalog }} --cog-workers 4
 
 # Enriquecer items com metadados reais dos COGs
 enrich:
-    cd pipeline && lapig-stac enrich -d ../{{ catalog }}
-
-# Gerar parquet no formato rustac (stac-geoparquet)
-build-parquet:
-    cd pipeline && python3 -c " \
-    import json, os; \
-    out = open('/tmp/stac_items.ndjson', 'w'); \
-    [out.write(json.dumps(json.load(open(os.path.join(r,f)))) + '\n') \
-     for r,_,fs in os.walk('{{ catalog }}/items') for f in sorted(fs) if f.endswith('.json')]; \
-    out.close()" && \
-    rustac translate /tmp/stac_items.ndjson {{ catalog }}/items_rustac.parquet -i ndjson -o parquet
-
-# Gerar JSONs de collection limpos para rustac serve
-# Remove links navegacionais (self/root/parent/items/item/child/collection)
-# para que o rustac regenere dinamicamente sob o domínio oficial; preserva
-# apenas os stylesheets, que precisam ser referenciados no clean file.
-build-collections:
-    cd pipeline && uv run python -c " \
-    import json; \
-    NAV = {'self', 'root', 'parent', 'items', 'item', 'child', 'collection'}; \
-    [( \
-        d := json.load(open(f'../{{ catalog }}/collections/{c}.json', encoding='utf-8')), \
-        d.__setitem__('links', [l for l in d.get('links', []) if l.get('rel') not in NAV]), \
-        json.dump(d, open(f'../{{ catalog }}/{c}.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=2) \
-    ) for c in ('pasture-area', 'pasture-vigor')]"
+    cd pipeline && uv run lapig-stac enrich -d ../{{ catalog }}
 
 # Validar items STAC (checagem estrutural do pipeline)
 validate:
-    cd pipeline && lapig-stac validate -d ../{{ catalog }}
+    cd pipeline && uv run lapig-stac validate -d ../{{ catalog }}
 
 # Validar schema oficial STAC 1.1.0 (stac-validator 4.x, recursivo via links)
 validate-schema:
@@ -61,13 +37,26 @@ validate-batch:
 lint:
     cd pipeline && uv run --isolated --with 'stac-check>=1.11' stac-check ../{{ catalog }}/catalog.json --recursive --links --assets
 
-# Instalar dependências Python
-pip-install:
-    cd pipeline && pip install -e .
+# Exportar o catálogo como ndjson (artefato consumido pelo `pypgstac load`).
+export-ndjson:
+    cd pipeline && uv run lapig-stac export-ndjson -d ../{{ catalog }}
 
-# Pipeline completo: generate → convert → enrich → parquet
-full: generate convert enrich build-parquet build-collections
+# Carregar o catálogo em uma instância pgstac apontada por DATABASE_URL.
+# Útil em dev quando se quer recarregar sem reiniciar o container.
+load-pgstac:
+    cd pipeline && uv run --extra pgstac lapig-stac load-pgstac -d ../{{ catalog }}
+
+# Pipeline completo: generate → convert → enrich
+full: convert enrich generate
     @echo "Pipeline completo executado."
+
+# ---------- Exportação opcional (stac-geoparquet) ---------------------------
+#
+# Alvo mantido apenas para casos em que se queira publicar o catálogo
+# também como stac-geoparquet (útil para clients DuckDB e interoperabilidade
+# com ferramentas como rustac / stac-geoparquet).  Não é usado em produção.
+export-geoparquet:
+    cd pipeline && uv run lapig-stac build-parquet -d ../{{ catalog }}
 
 # ---------- Serve (local) -----------------------------------------------------
 
@@ -84,15 +73,6 @@ stop:
 db-reset:
     docker compose down -v
     docker volume rm -f lapig-stac_pgdata 2>/dev/null || true
-
-# Exportar o catálogo como ndjson (artefato consumido pelo `pypgstac load`).
-export-ndjson:
-    cd pipeline && uv run lapig-stac export-ndjson -d ../{{ catalog }}
-
-# Carregar o catálogo em uma instância pgstac apontada por DATABASE_URL.
-# Útil em dev quando se quer recarregar sem reiniciar o container.
-load-pgstac:
-    cd pipeline && uv run --extra pgstac lapig-stac load-pgstac -d ../{{ catalog }}
 
 # ---------- Docker Compose ----------------------------------------------------
 

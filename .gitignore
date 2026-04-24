@@ -29,10 +29,12 @@ catalog/collections.ndjson
 catalog/items.ndjson
 catalog/lapig-catalog.json
 
-# Exceções: arquivos pequenos do catálogo necessários ao build Docker
+# Exceções: arquivos pequenos do catálogo necessários ao build Docker.
+# Os JSONs `pasture-*.json` eram os "clean files" consumidos pelo antigo
+# rustac e podem ser removidos num próximo passo; os estilos permanecem
+# pois o nginx os serve como arquivos estáticos.
 !catalog/pasture-area.json
 !catalog/pasture-vigor.json
-!catalog/items_rustac.parquet
 !catalog/styles/
 
 # === Ambiente ===

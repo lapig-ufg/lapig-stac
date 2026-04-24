@@ -1,4 +1,14 @@
-"""Build a stac-geoparquet file from generated STAC Item JSONs."""
+"""Exportação opcional do catálogo como stac-geoparquet.
+
+O servidor STAC em produção (stac-fastapi-pgstac) ingere o catálogo
+diretamente dos arquivos `collections.ndjson`/`items.ndjson` emitidos
+por `pipeline.load_pgstac.export_ndjson`. Este módulo fica disponível
+apenas para quem precise publicar o catálogo também no formato
+stac-geoparquet — útil para consumidores DuckDB, pystac-client offline
+ou ferramentas como `rustac` e `stac-geoparquet`.
+
+Não é parte do caminho crítico do deploy.
+"""
 
 from __future__ import annotations
 

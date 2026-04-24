@@ -5,8 +5,8 @@ from pathlib import Path
 
 from pipeline.local_scanner import scan_local_data
 from pipeline.generate_stac import generate_catalog, scan_result_to_parse_result
+from pipeline.load_pgstac import export_ndjson
 from pipeline.validate_catalog import validate_catalog
-from pipeline.build_geoparquet import build_geoparquet
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 OUTPUT_DIR = Path(__file__).parent.parent / "catalog"
@@ -30,7 +30,7 @@ print(f"Validation: {files} files, {errors} errors")
 for m in msgs:
     print(f"  ERROR: {m}")
 
-# 5. GeoParquet
-build_geoparquet(OUTPUT_DIR)
+# 5. Export ndjson (consumido por pypgstac load no boot dos containers)
+export_ndjson(OUTPUT_DIR)
 
 print("Pipeline complete!")
