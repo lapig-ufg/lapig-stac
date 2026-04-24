@@ -227,18 +227,6 @@
       "rel": "item",
       "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor/items/pasture-vigor-2024",
       "type": "application/json"
-    },
-    {
-      "rel": "stylesheet",
-      "type": "application/vnd.ogc.sld+xml",
-      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor/styles/pasture-vigor.sld",
-      "title": "Estilo SLD — MapBiomas Col. 10 — Vigor de Pastagem"
-    },
-    {
-      "rel": "stylesheet",
-      "type": "application/x-qgis-style",
-      "href": "https://stac.lapig.iesa.ufg.br/api/collections/pasture-vigor/styles/pasture-vigor.qml",
-      "title": "Estilo QML — MapBiomas Col. 10 — Vigor de Pastagem"
     }
   ],
   "extra_fields": {

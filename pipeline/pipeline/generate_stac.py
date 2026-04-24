@@ -221,21 +221,10 @@ def _make_collection_dict(
         {"rel": "items", "href": f"{collection_url}/items", "type": "application/geo+json"},
     ]
 
-    # Stylesheets (SLD, QML) — servidos sob o domínio oficial da API
-    for sld_path in record.sld_urls:
-        links.append({
-            "rel": "stylesheet",
-            "type": "application/vnd.ogc.sld+xml",
-            "href": f"{collection_url}/styles/{Path(sld_path).name}",
-            "title": f"Estilo SLD — {record.title}",
-        })
-    for qml_path in record.qml_urls:
-        links.append({
-            "rel": "stylesheet",
-            "type": "application/x-qgis-style",
-            "href": f"{collection_url}/styles/{Path(qml_path).name}",
-            "title": f"Estilo QML — {record.title}",
-        })
+    # Observação: os stylesheets (SLD, QML) são anexados em cada Item —
+    # ver `_make_item_dict`. Mantê-los apenas no Item torna o documento do
+    # Item autossuficiente para clientes que não seguem os links parent/
+    # collection.
 
     collection: dict[str, Any] = {
         "type": "Collection",
@@ -279,6 +268,9 @@ def _make_item_dict(
     gsd: float | None,
     bbox: list[float],
     geometry: dict,
+    collection_title: str = "",
+    sld_urls: list[str] | None = None,
+    qml_urls: list[str] | None = None,
 ) -> dict[str, Any]:
     """Build a STAC Item dict."""
     properties: dict[str, Any] = {
@@ -306,6 +298,32 @@ def _make_item_dict(
             }
 
     collection_url = f"{API_BASE_URL}/collections/{collection_id}"
+    links: list[dict[str, str]] = [
+        {"rel": "self", "href": f"{collection_url}/items/{item_def.item_id}", "type": "application/geo+json"},
+        {"rel": "root", "href": f"{API_BASE_URL}/", "type": "application/json"},
+        {"rel": "parent", "href": collection_url, "type": "application/json"},
+        {"rel": "collection", "href": collection_url, "type": "application/json"},
+    ]
+
+    # Stylesheets (SLD, QML) — servidos sob o domínio oficial da API.
+    # São anexados ao Item (e não à Collection) para que o documento do
+    # Item seja autossuficiente em clientes que não seguem rel=collection.
+    title_suffix = f" — {collection_title}" if collection_title else ""
+    for sld_path in (sld_urls or []):
+        links.append({
+            "rel": "stylesheet",
+            "type": "application/vnd.ogc.sld+xml",
+            "href": f"{collection_url}/styles/{Path(sld_path).name}",
+            "title": f"Estilo SLD{title_suffix}",
+        })
+    for qml_path in (qml_urls or []):
+        links.append({
+            "rel": "stylesheet",
+            "type": "application/x-qgis-style",
+            "href": f"{collection_url}/styles/{Path(qml_path).name}",
+            "title": f"Estilo QML{title_suffix}",
+        })
+
     return {
         "type": "Feature",
         "stac_version": STAC_VERSION,
@@ -318,12 +336,7 @@ def _make_item_dict(
         "bbox": bbox,
         "properties": properties,
         "assets": assets,
-        "links": [
-            {"rel": "self", "href": f"{collection_url}/items/{item_def.item_id}", "type": "application/geo+json"},
-            {"rel": "root", "href": f"{API_BASE_URL}/", "type": "application/json"},
-            {"rel": "parent", "href": collection_url, "type": "application/json"},
-            {"rel": "collection", "href": collection_url, "type": "application/json"},
-        ],
+        "links": links,
     }
 
 
@@ -372,6 +385,27 @@ def generate_catalog(
             "type": "application/json",
             "title": rec.title,
         })
+
+    # Stylesheets no catalog: uma entrada por arquivo de estilo de cada
+    # collection, com title identificando a coleção correspondente. Dá aos
+    # clientes que abrem apenas a landing page uma visão completa dos
+    # estilos disponíveis sem precisar navegar para cada collection/item.
+    for rec in parse_result.collections:
+        collection_url = f"{API_BASE_URL}/collections/{rec.id}"
+        for sld_path in rec.sld_urls:
+            catalog_dict["links"].append({
+                "rel": "stylesheet",
+                "type": "application/vnd.ogc.sld+xml",
+                "href": f"{collection_url}/styles/{Path(sld_path).name}",
+                "title": f"Estilo SLD — {rec.title}",
+            })
+        for qml_path in rec.qml_urls:
+            catalog_dict["links"].append({
+                "rel": "stylesheet",
+                "type": "application/x-qgis-style",
+                "href": f"{collection_url}/styles/{Path(qml_path).name}",
+                "title": f"Estilo QML — {rec.title}",
+            })
 
     _write_json(out / "catalog.json", catalog_dict)
 
@@ -425,7 +459,12 @@ def generate_catalog(
         col_items_dir.mkdir(parents=True, exist_ok=True)
 
         for item_def in rec.items:
-            item_dict = _make_item_dict(rec.id, item_def, rec.gsd, bbox, geom)
+            item_dict = _make_item_dict(
+                rec.id, item_def, rec.gsd, bbox, geom,
+                collection_title=rec.title,
+                sld_urls=rec.sld_urls,
+                qml_urls=rec.qml_urls,
+            )
             _write_json(col_items_dir / f"{item_def.item_id}.json", item_dict)
             total_items += 1
 
