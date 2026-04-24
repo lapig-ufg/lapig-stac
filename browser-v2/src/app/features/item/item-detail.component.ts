@@ -16,7 +16,6 @@ import { MapCanvasComponent } from '@/app/features/map/map-canvas.component';
 import { CogControlsComponent } from '@/app/features/map/components/cog-controls.component';
 import { MetadataPanelComponent } from '@/app/shared/components/metadata-panel/metadata-panel.component';
 import { AssetListComponent } from './components/asset-list.component';
-import { StyleListComponent } from './components/style-list.component';
 import { JsonViewerComponent } from '@/app/shared/components/json-viewer/json-viewer.component';
 import { ApiSnippetComponent } from '@/app/shared/components/api-snippet/api-snippet.component';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -31,7 +30,7 @@ import { createDefaultCogStyle } from '@/app/features/map/models/cog-style.types
         CommonModule, RouterModule, ButtonModule, MessageModule, SkeletonModule,
         TabsModule, TooltipModule, SplitterModule, TranslatePipe, MapCanvasComponent,
         CogControlsComponent, MetadataPanelComponent, AssetListComponent,
-        StyleListComponent, JsonViewerComponent, ApiSnippetComponent
+        JsonViewerComponent, ApiSnippetComponent
     ],
     styles: `
         :host ::ng-deep .item-splitter .p-splitterpanel {
@@ -106,15 +105,6 @@ import { createDefaultCogStyle } from '@/app/features/map/models/cog-style.types
                             />
                         </div>
 
-                        @if (itemStylesheets()) {
-                            <div class="mt-4 pt-4" style="border-top: 1px solid var(--surface-border);">
-                                <app-style-list
-                                    [styles]="itemStylesheets()!"
-                                    [baseUrl]="collectionBaseUrl()"
-                                    (applyStyle)="onApplyStyle($event)"
-                                />
-                            </div>
-                        }
                     </div>
                 </ng-template>
                 <ng-template #panel>
@@ -153,7 +143,7 @@ import { createDefaultCogStyle } from '@/app/features/map/models/cog-style.types
                     </p-tablist>
                     <p-tabpanels>
                         <p-tabpanel value="assets">
-                            <app-asset-list [assets]="dataAssets()" />
+                            <app-asset-list [assets]="item.assets" />
                         </p-tabpanel>
                         <p-tabpanel value="api">
                             <app-api-snippet
@@ -188,22 +178,6 @@ export class ItemDetailComponent {
 
     collectionAssets = computed(() => this.collection()?.assets ?? null);
 
-    /**
-     * Extrai apenas os assets com role "style" do item, para alimentar o
-     * `<app-style-list>` sem incluir assets de dados/thumbnail.
-     */
-    itemStylesheets = computed<Record<string, StacAsset> | null>(() => {
-        const assets = this.item()?.assets;
-        if (!assets) return null;
-        const filtered: Record<string, StacAsset> = {};
-        for (const [key, asset] of Object.entries(assets)) {
-            if (asset.roles?.includes('style')) {
-                filtered[key] = asset;
-            }
-        }
-        return Object.keys(filtered).length > 0 ? filtered : null;
-    });
-
     collectionId: string;
     itemId: string;
 
@@ -218,23 +192,7 @@ export class ItemDetailComponent {
 
     itemBbox = computed<number[] | null>(() => this.item()?.bbox ?? null);
 
-    /**
-     * Assets exibidos na aba "Assets" — excluímos os de role "style"
-     * porque esses já aparecem na seção "Estilos" ao lado do mapa, e
-     * incluí-los nas duas visões duplicaria informação para o usuário.
-     */
-    dataAssets = computed<Record<string, StacAsset>>(() => {
-        const assets = this.item()?.assets ?? {};
-        const filtered: Record<string, StacAsset> = {};
-        for (const [key, asset] of Object.entries(assets)) {
-            if (!asset.roles?.includes('style')) {
-                filtered[key] = asset;
-            }
-        }
-        return filtered;
-    });
-
-    assetCount = computed(() => Object.keys(this.dataAssets()).length);
+    assetCount = computed(() => Object.keys(this.item()?.assets ?? {}).length);
 
     stacItemUrl = computed(() => `${environment.stacApiUrl}/collections/${this.collectionId}/items/${this.itemId}`);
 
@@ -386,12 +344,6 @@ export class ItemDetailComponent {
                 this.loading.set(false);
             }
         });
-    }
-
-    onApplyStyle(classes: ClassificationEntry[]) {
-        const bands = this.cogBands();
-        const config = createDefaultCogStyle(bands.length, classes);
-        this.cogStyleConfig.set(config);
     }
 
     private loadCollectionStyles() {
