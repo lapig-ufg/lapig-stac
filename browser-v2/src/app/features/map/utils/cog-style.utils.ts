@@ -69,13 +69,16 @@ export function rampToGradient(rampId: ColorRampId): string {
 }
 
 /**
- * Converte cor hexadecimal (#RRGGBB ou #RRGGBBAA) para floats normalizados [r, g, b, a].
+ * Converte cor hexadecimal (#RRGGBB ou #RRGGBBAA) no formato esperado pelo
+ * OpenLayers WebGLTileLayer: canais RGB em 0–255 e alpha em 0–1
+ * (ver https://openlayers.org/en/latest/examples/cog-colors.html e
+ * chroma.js, que também retorna `.rgb()` em 0–255).
  */
 export function parseHexColor(hex: string): [number, number, number, number] {
     const clean = hex.replace('#', '');
-    const r = parseInt(clean.substring(0, 2), 16) / 255;
-    const g = parseInt(clean.substring(2, 4), 16) / 255;
-    const b = parseInt(clean.substring(4, 6), 16) / 255;
+    const r = parseInt(clean.substring(0, 2), 16);
+    const g = parseInt(clean.substring(2, 4), 16);
+    const b = parseInt(clean.substring(4, 6), 16);
     const a = clean.length >= 8 ? parseInt(clean.substring(6, 8), 16) / 255 : 1;
     return [r, g, b, a];
 }
@@ -149,11 +152,13 @@ export function buildCogStyle(config: CogStyleConfig): Record<string, unknown> {
     // Normaliza o valor da banda para 0–1 e interpola as cores
     const normalized: unknown[] = ['/', ['-', ['band', band], min], range];
 
-    // Constrói a expressão de interpolação
+    // Constrói a expressão de interpolação. O WebGLTileLayer do OpenLayers
+    // aceita (e espera) canais RGB em 0–255; o alpha permanece em 0–1.
+    // Ver https://openlayers.org/en/latest/examples/cog-colors.html.
     const interpolateArgs: unknown[] = ['interpolate', ['linear'], normalized];
     for (const [stopVal, r, g, b, a] of stops) {
         interpolateArgs.push(stopVal);
-        interpolateArgs.push([r / 255, g / 255, b / 255, a]);
+        interpolateArgs.push([r, g, b, a]);
     }
 
     return {
