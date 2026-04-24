@@ -313,6 +313,20 @@ export class MapCanvasComponent implements AfterViewInit, OnDestroy {
             }
         });
 
+        // Marcar a checkbox "filtrar por área no mapa" no search já põe o
+        // mapa em modo de desenho de retângulo — o usuário só precisa
+        // arrastar sobre o mapa. Isso evita o passo extra de clicar no
+        // botão de desenho que vinha passando despercebido.
+        effect(() => {
+            const enabled = this.enableDraw();
+            if (!this.mapInitialized) return;
+            if (enabled && this.drawMode() === 'none') {
+                this.toggleDrawMode('bbox');
+            } else if (!enabled && this.drawMode() !== 'none') {
+                this.toggleDrawMode(this.drawMode());
+            }
+        });
+
         this.destroyRef.onDestroy(() => this.cleanup());
     }
 

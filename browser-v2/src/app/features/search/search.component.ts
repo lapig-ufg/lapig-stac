@@ -64,8 +64,16 @@ import { MapCanvasComponent } from '@/app/features/map/map-canvas.component';
             flex-direction: column;
             gap: 0.5rem;
         }
-        :host ::ng-deep .filter-dates .p-datepicker {
+        /* Uniformizar largura dos controles: o p-datepicker com showIcon
+         * renderiza um input-group que não se estica sozinho — ao contrário
+         * do pInputText e do p-multiselect, que já respeitam w-full. Força
+         * 100% em todas as camadas do componente. */
+        :host ::ng-deep .filter-dates .p-datepicker,
+        :host ::ng-deep .filter-dates .p-datepicker .p-inputwrapper,
+        :host ::ng-deep .filter-dates .p-datepicker .p-inputtext,
+        :host ::ng-deep .filter-dates .p-datepicker input {
             width: 100%;
+            box-sizing: border-box;
         }
         @media (max-width: 991px) {
             .search-layout {
